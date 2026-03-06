@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" {% if is_arabic %}dir="rtl" {% endif %}>
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+
+            @frame footer {
+                -pdf-frame-content: footer_content;
+                bottom: 1cm;
+                margin-left: 2cm;
+                margin-right: 2cm;
+                height: 1cm;
+            }
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{{ font_path }}');
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            color: #333333;
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .header td {
+            vertical-align: top;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #721C97;
+            margin-bottom: 5px;
+        }
+
+        .info-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #C1FF72;
+            margin-bottom: 20px;
+        }
+
+        .table-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .table-items th {
+            background-color: #721C97;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .table-items td {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .totals-table {
+            width: 50%;
+            float: right;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 5px 10px;
+        }
+
+        .totals-table .bold {
+            font-weight: bold;
+        }
+
+        .totals-table .total-row {
+            border-top: 2px solid #721C97;
+            font-size: 16px;
+        }
+
+        .notes {
+            margin-top: 50px;
+            font-size: 12px;
+            color: #666;
+            clear: both;
+        }
+    </style>
+</head>
+
+<body>
+
+    <table class="header">
+        <tr>
+            <td width="50%">
+                <div class="title">{{ labels.invoice }}</div>
+                <div><b>{{ company.name }}</b></div>
+                {% if company.email %}<div>{{ company.email }}</div>{% endif %}
+                {% if company.phone_number %}<div>{{ company.phone_number }}</div>{% endif %}
+            </td>
+            <td width="50%" align="right">
+                <div class="info-box">
+                    <table width="100%">
+                        <tr>
+                            <td><b>{{ labels.invoice_number }}:</b></td>
+                            <td align="right">{{ invoice.invoice_number }}</td>
+                        </tr>
+                        <tr>
+                            <td><b>{{ labels.issue_date }}:</b></td>
+                            <td align="right">{{ invoice.issue_date }}</td>
+                        </tr>
+                        <tr>
+                            <td><b>{{ labels.due_date }}:</b></td>
+                            <td align="right">{{ invoice.due_date }}</td>
+                        </tr>
+                        <tr>
+                            <td><b>{{ labels.status }}:</b></td>
+                            <td align="right">{{ invoice.status }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-bottom: 30px;">
+        <div><b>{{ labels.bill_to }}:</b></div>
+        <div>{{ invoice.customer.name }}</div>
+        {% if invoice.customer.company_name %}<div>{{ invoice.customer.company_name }}</div>{% endif %}
+        {% if invoice.customer.address %}<div>{{ invoice.customer.address }}</div>{% endif %}
+        {% if invoice.project %}
+        <div style="margin-top: 10px;"><b>{{ labels.project }}:</b> {{ invoice.project.name }}</div>
+        {% endif %}
+    </div>
+
+    <table class="table-items">
+        <thead>
+            <tr>
+                <th width="50%">{{ labels.description }}</th>
+                <th width="15%" align="center">{{ labels.qty }}</th>
+                <th width="15%" align="right">{{ labels.unit_price }}</th>
+                <th width="20%" align="right">{{ labels.amount }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td align="center">{{ item.quantity }}</td>
+                <td align="right">{{ item.unit_price }}</td>
+                <td align="right">{{ item.amount }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" align="center">{{ labels.no_items }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals-table">
+        <tr>
+            <td>{{ labels.subtotal }}:</td>
+            <td align="right">{{ invoice.subtotal }} {{ invoice.currency }}</td>
+        </tr>
+        <tr>
+            <td>{{ labels.tax }} ({{ invoice.tax_rate }}%):</td>
+            <td align="right">{{ invoice.tax_amount }} {{ invoice.currency }}</td>
+        </tr>
+        {% if invoice.discount > 0 %}
+        <tr>
+            <td>{{ labels.discount }}:</td>
+            <td align="right">-{{ invoice.discount }} {{ invoice.currency }}</td>
+        </tr>
+        {% endif %}
+        <tr class="total-row">
+            <td class="bold">{{ labels.total }}:</td>
+            <td align="right" class="bold">{{ invoice.total_amount }} {{ invoice.currency }}</td>
+        </tr>
+        {% if invoice.amount_paid > 0 %}
+        <tr>
+            <td>{{ labels.amount_paid }}:</td>
+            <td align="right">{{ invoice.amount_paid }} {{ invoice.currency }}</td>
+        </tr>
+        <tr>
+            <td class="bold">{{ labels.balance_due }}:</td>
+            <td align="right" class="bold">{{ outstanding_balance }} {{ invoice.currency }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    {% if invoice.notes %}
+    <div class="notes">
+        <b>{{ labels.notes }}:</b><br />
+        {{ invoice.notes }}
+    </div>
+    {% endif %}
+
+    <div id="footer_content">
+        Page <pdf:pagenumber> of <pdf:pagecount>
+    </div>
+
+</body>
+
+</html>

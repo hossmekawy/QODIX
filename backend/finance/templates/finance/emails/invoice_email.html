@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Invoice {{ invoice_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #070308;
+            color: #ffffff;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #110915;
+            border-radius: 16px;
+            border: 1px solid #721C97;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(114, 28, 151, 0.4);
+        }
+
+        .header {
+            background-color: #070308;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header h1 {
+            color: #C1FF72;
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 2px;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        p {
+            color: #aaaaaa;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .details-box {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .details-box table {
+            width: 100%;
+        }
+
+        .details-box td {
+            padding: 8px 0;
+            color: #aaaaaa;
+            font-size: 14px;
+        }
+
+        .details-box td:last-child {
+            text-align: right;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 40px 0 20px;
+        }
+
+        .button {
+            background-color: #C1FF72;
+            color: #070308;
+            padding: 14px 28px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 0 15px rgba(193, 255, 114, 0.3);
+        }
+
+        .footer {
+            background-color: #070308;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ company_name }}</h1>
+        </div>
+        <div class="content">
+            <h2 style="color: #ffffff; margin-top: 0;">Hello <span class="highlight">{{ customer_name }}</span>,</h2>
+            <p>Thank you for your business! Please find attached your invoice
+                <span style="color: #721C97; font-weight: bold;">#{{ invoice_number }}</span>.
+            </p>
+
+            <div class="details-box">
+                <table>
+                    <tr>
+                        <td>Issue Date:</td>
+                        <td>{{ issue_date }}</td>
+                    </tr>
+                    <tr>
+                        <td>Due Date:</td>
+                        <td>{{ due_date }}</td>
+                    </tr>
+                    <tr>
+                        <td>Total Amount:</td>
+                        <td style="color: #C1FF72; font-size: 18px;">{{ total_amount }} {{ currency }}</td>
+                    </tr>
+                    <tr>
+                        <td>Status:</td>
+                        <td>{{ status }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p>You can find the detailed breakdown and payment instructions in the attached PDF.</p>
+
+            <div class="btn-container">
+                <!-- If you have an online portal for them -->
+                <a href="{{ portal_url }}" class="button">View Online</a>
+            </div>
+        </div>
+        <div class="footer">
+            &copy; {{ current_year }} {{ company_name }}. All rights reserved.<br>
+            If you have any questions, please contact us at {{ company_email }}.
+        </div>
+    </div>
+</body>
+
+</html>
