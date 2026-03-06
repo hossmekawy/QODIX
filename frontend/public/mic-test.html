@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Microphone Test</title>
+    <style>
+        body { font-family: Arial; background: #1a1a2e; color: white; padding: 40px; }
+        button { padding: 12px 24px; margin: 8px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .start { background: #4CAF50; color: white; }
+        .stop { background: #f44336; color: white; }
+        #level-bar { width: 400px; height: 30px; background: #333; border-radius: 4px; overflow: hidden; margin: 20px 0; }
+        #level-fill { height: 100%; background: linear-gradient(90deg, green, yellow, red); width: 0%; transition: width 0.05s; }
+        #status { padding: 10px; background: #333; border-radius: 4px; margin: 10px 0; }
+        audio { margin: 10px 0; display: block; }
+        .section { border: 1px solid #444; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🎤 Microphone Diagnostic Test</h1>
+    
+    <div class="section">
+        <h2>Step 1: Check Microphone Access</h2>
+        <button class="start" onclick="checkMic()">Check Microphone</button>
+        <div id="status">Click "Check Microphone" to start</div>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: Real-time Audio Level (speak into your mic)</h2>
+        <div id="level-bar"><div id="level-fill"></div></div>
+        <div id="level-value">Level: --</div>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Record & Playback Test</h2>
+        <button class="start" onclick="startRecord()">Start Recording</button>
+        <button class="stop" onclick="stopRecord()">Stop Recording</button>
+        <div id="rec-status">Not recording</div>
+        <div id="playback"></div>
+    </div>
+
+    <div class="section">
+        <h2>Debug Log</h2>
+        <pre id="log" style="background:#222; padding:10px; max-height:300px; overflow:auto;"></pre>
+    </div>
+
+    <script>
+        let stream = null;
+        let audioContext = null;
+        let analyser = null;
+        let animId = null;
+        let pcmChunks = [];
+        let processor = null;
+        let source = null;
+
+        function log(msg) {
+            const el = document.getElementById('log');
+            el.textContent += new Date().toLocaleTimeString() + ': ' + msg + '\n';
+            el.scrollTop = el.scrollHeight;
+            console.log(msg);
+        }
+
+        async function checkMic() {
+            const statusEl = document.getElementById('status');
+            try {
+                log('Requesting microphone access...');
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                    }
+                });
+
+                const track = stream.getAudioTracks()[0];
+                const settings = track.getSettings();
+                
+                statusEl.innerHTML = `
+                    ✅ Microphone access granted!<br>
+                    <b>Device:</b> ${track.label}<br>
+                    <b>Sample Rate:</b> ${settings.sampleRate || 'default'}<br>
+                    <b>Channels:</b> ${settings.channelCount || 'default'}<br>
+                    <b>Echo Cancellation:</b> ${settings.echoCancellation}<br>
+                    <b>Noise Suppression:</b> ${settings.noiseSuppression}<br>
+                    <b>Auto Gain:</b> ${settings.autoGainControl}<br>
+                    <b>Track State:</b> ${track.readyState}<br>
+                    <b>Track Enabled:</b> ${track.enabled}<br>
+                    <b>Track Muted:</b> ${track.muted}
+                `;
+                statusEl.style.background = '#1b5e20';
+
+                log('Mic track: ' + track.label);
+                log('Track state: ' + track.readyState + ', enabled: ' + track.enabled + ', muted: ' + track.muted);
+                log('Settings: ' + JSON.stringify(settings));
+
+                // Start level meter
+                startLevelMeter();
+
+            } catch (err) {
+                statusEl.textContent = '❌ Error: ' + err.message;
+                statusEl.style.background = '#b71c1c';
+                log('ERROR: ' + err.message);
+            }
+        }
+
+        function startLevelMeter() {
+            if (!stream) return;
+            
+            audioContext = new AudioContext();
+            log('AudioContext created. State: ' + audioContext.state + ', SampleRate: ' + audioContext.sampleRate);
+            
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            
+            source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            const fillEl = document.getElementById('level-fill');
+            const valueEl = document.getElementById('level-value');
+            
+            let maxSeen = 0;
+            let sampleCount = 0;
+            
+            function update() {
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                }
+                const avg = sum / dataArray.length;
+                const pct = Math.min(100, (avg / 128) * 100);
+                fillEl.style.width = pct + '%';
+                
+                if (avg > maxSeen) maxSeen = avg;
+                sampleCount++;
+                
+                if (sampleCount % 30 === 0) {
+                    valueEl.textContent = `Level: ${avg.toFixed(1)} | Max seen: ${maxSeen.toFixed(1)} | ${pct > 5 ? '🔊 Sound detected!' : '🔇 No sound detected'}`;
+                }
+                
+                animId = requestAnimationFrame(update);
+            }
+            update();
+        }
+
+        function startRecord() {
+            if (!stream) {
+                log('ERROR: No microphone stream. Click "Check Microphone" first.');
+                return;
+            }
+            
+            const recCtx = new AudioContext();
+            log('Recording AudioContext. State: ' + recCtx.state + ', SampleRate: ' + recCtx.sampleRate);
+            
+            const recSource = recCtx.createMediaStreamSource(stream);
+            processor = recCtx.createScriptProcessor(4096, 1, 1);
+            pcmChunks = [];
+            
+            let chunkCount = 0;
+            let nonZeroChunks = 0;
+            
+            processor.onaudioprocess = (e) => {
+                const data = e.inputBuffer.getChannelData(0);
+                const copy = new Float32Array(data);
+                pcmChunks.push(copy);
+                chunkCount++;
+                
+                // Check if this chunk has non-zero data
+                let hasSound = false;
+                let maxVal = 0;
+                for (let i = 0; i < copy.length; i++) {
+                    const abs = Math.abs(copy[i]);
+                    if (abs > maxVal) maxVal = abs;
+                    if (abs > 0.001) hasSound = true;
+                }
+                if (hasSound) nonZeroChunks++;
+                
+                if (chunkCount % 10 === 0) {
+                    log(`Chunk #${chunkCount}: maxVal=${maxVal.toFixed(6)}, hasSound=${hasSound}, nonZero=${nonZeroChunks}/${chunkCount}`);
+                }
+            };
+            
+            recSource.connect(processor);
+            processor.connect(recCtx.destination);
+            
+            // Store for cleanup
+            window._recCtx = recCtx;
+            window._recSource = recSource;
+            
+            document.getElementById('rec-status').textContent = '🔴 Recording...';
+            document.getElementById('rec-status').style.color = '#f44336';
+            log('Recording started with ScriptProcessor');
+        }
+
+        function stopRecord() {
+            if (processor) {
+                processor.disconnect();
+                processor.onaudioprocess = null;
+            }
+            if (window._recSource) window._recSource.disconnect();
+            if (window._recCtx) window._recCtx.close();
+            
+            document.getElementById('rec-status').textContent = 'Recording stopped. Processing...';
+            
+            if (pcmChunks.length === 0) {
+                log('No audio chunks captured!');
+                return;
+            }
+            
+            log(`Total chunks: ${pcmChunks.length}`);
+            
+            // Merge chunks
+            const totalLen = pcmChunks.reduce((a, c) => a + c.length, 0);
+            const merged = new Float32Array(totalLen);
+            let offset = 0;
+            for (const chunk of pcmChunks) {
+                merged.set(chunk, offset);
+                offset += chunk.length;
+            }
+            
+            // Check audio data
+            let nonZero = 0;
+            let maxVal = 0;
+            for (let i = 0; i < merged.length; i++) {
+                if (Math.abs(merged[i]) > 0.001) nonZero++;
+                if (Math.abs(merged[i]) > maxVal) maxVal = Math.abs(merged[i]);
+            }
+            log(`Total samples: ${merged.length}, non-zero: ${nonZero}, max value: ${maxVal.toFixed(6)}`);
+            
+            // Encode WAV
+            const sampleRate = window._recCtx ? 44100 : 44100;
+            const wavBlob = encodeWAV(merged, sampleRate);
+            log(`WAV blob size: ${wavBlob.size} bytes`);
+            
+            // Create playback
+            const url = URL.createObjectURL(wavBlob);
+            const playbackDiv = document.getElementById('playback');
+            playbackDiv.innerHTML = `
+                <p>✅ Recording complete (${(wavBlob.size/1024).toFixed(1)} KB)</p>
+                <audio controls src="${url}"></audio>
+                <br>
+                <a href="${url}" download="test_recording.wav" style="color:#4CAF50">Download WAV file</a>
+            `;
+            
+            document.getElementById('rec-status').textContent = 'Done! Play back below:';
+            document.getElementById('rec-status').style.color = '#4CAF50';
+        }
+
+        function encodeWAV(samples, sampleRate) {
+            const numChannels = 1;
+            const bitsPerSample = 16;
+            const bytesPerSample = bitsPerSample / 8;
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataLength = samples.length * bytesPerSample;
+            
+            const buffer = new ArrayBuffer(44 + dataLength);
+            const view = new DataView(buffer);
+            
+            // RIFF header
+            writeStr(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataLength, true);
+            writeStr(view, 8, 'WAVE');
+            writeStr(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitsPerSample, true);
+            writeStr(view, 36, 'data');
+            view.setUint32(40, dataLength, true);
+            
+            let off = 44;
+            for (let i = 0; i < samples.length; i++) {
+                const s = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                off += 2;
+            }
+            
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function writeStr(view, offset, str) {
+            for (let i = 0; i < str.length; i++) {
+                view.setUint8(offset + i, str.charCodeAt(i));
+            }
+        }
+    </script>
+</body>
+</html>
