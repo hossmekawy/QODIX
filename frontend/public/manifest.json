@@ -1,0 +1,23 @@
+{
+    "name": "QODIX Agency",
+    "short_name": "QODIX",
+    "description": "Welcome to QODIX Agency. A centralized portal for managing your enterprise resources.",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#070308",
+    "theme_color": "#721C97",
+    "icons": [
+        {
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

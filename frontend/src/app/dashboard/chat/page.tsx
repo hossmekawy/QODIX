@@ -1,18 +1,28 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { FiSend, FiPaperclip, FiMic, FiMoreVertical, FiSearch, FiFileText, FiImage, FiPlus, FiMessageSquare } from 'react-icons/fi';
+import { FiSend, FiPaperclip, FiMic, FiSearch, FiFileText, FiImage, FiPlus, FiMessageSquare, FiArrowLeft } from 'react-icons/fi';
 import api from '@/lib/api';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 
 const isClient = typeof window !== 'undefined';
 const HOST = isClient ? window.location.hostname : '127.0.0.1';
-const BACKEND_URL = `http://${HOST}:8000`;
+const PORT = isClient ? window.location.port : '9000';
+const BACKEND_URL = `http://${HOST}:${PORT}`;
 
 function resolveMediaUrl(url: string | null | undefined): string | null {
     if (!url) return null;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
     return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
+function isImageUrl(url: string): boolean {
+    try {
+        const pathname = new URL(url).pathname;
+        return /\.(jpeg|jpg|gif|png|webp|bmp|svg)$/i.test(pathname);
+    } catch {
+        return /\.(jpeg|jpg|gif|png|webp|bmp|svg)$/i.test(url);
+    }
 }
 
 export default function ChatPage() {
@@ -22,7 +32,11 @@ export default function ChatPage() {
     const [messages, setMessages] = useState<any[]>([]);
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(true);
+    const [sending, setSending] = useState(false);
     const [myUserId, setMyUserId] = useState<number | null>(null);
+
+    // Mobile state: show chat panel when a conversation is selected
+    const [showChatPanel, setShowChatPanel] = useState(false);
 
     // New Chat Modal State
     const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
@@ -35,14 +49,13 @@ export default function ChatPage() {
     const [attachment, setAttachment] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Voice Recording (WAV-based, bypasses MediaRecorder codec issues)
+    // Voice Recording
     const { isRecording, recordingTime, audioBlob: voiceNote, startRecording, stopRecording, cancelRecording, clearAudioBlob: clearVoiceNote } = useAudioRecorder();
 
     const ws = useRef<WebSocket | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        // Fetch current user ID for aligning chat bubbles (mine vs theirs)
         api.get('/accounts/profile/').then(res => setMyUserId(res.data.id)).catch(() => { });
         fetchConversations();
     }, []);
@@ -80,7 +93,6 @@ export default function ChatPage() {
             setGroupName('');
             setUserSearchQuery('');
 
-            // Refresh conversations and select the new one
             await fetchConversations();
             selectConversation(res.data);
         } catch (error) {
@@ -105,6 +117,8 @@ export default function ChatPage() {
 
     const selectConversation = async (conv: any) => {
         setActiveConversation(conv);
+        setShowChatPanel(true); // On mobile, switch to chat view
+
         if (ws.current) {
             ws.current.close();
             ws.current = null;
@@ -115,15 +129,13 @@ export default function ChatPage() {
             setMessages(msgRes.data.reverse());
 
             const token = localStorage.getItem('access_token');
-            const wsUrl = `ws://${HOST}:8000/ws/chat/${conv.id}/?token=${token}`;
+            const wsUrl = `ws://${HOST}:${PORT}/ws/chat/${conv.id}/?token=${token}`;
 
             let reconnectDelay = 2000;
             let currentWs: WebSocket | null = null;
             let reconnectTimer: ReturnType<typeof setTimeout>;
 
             const connectWs = () => {
-                if (activeConversation?.id !== conv.id) return; // Stale connection attempt
-
                 currentWs = new WebSocket(wsUrl);
                 ws.current = currentWs;
 
@@ -135,17 +147,16 @@ export default function ChatPage() {
                 currentWs.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     setMessages(prev => {
-                        // Deduplicate: skip if message already exists from optimistic update
                         if (data.id && prev.some(m => m.id === data.id)) return prev;
                         return [...prev, data];
                     });
                 };
 
                 currentWs.onclose = () => {
-                    if (activeConversation?.id === conv.id) {
+                    if (ws.current === currentWs) {
                         console.log(`Chat WS closed. Reconnecting in ${reconnectDelay / 1000}s...`);
                         reconnectTimer = setTimeout(connectWs, reconnectDelay);
-                        reconnectDelay = Math.min(reconnectDelay * 2, 30000); // Max 30s
+                        reconnectDelay = Math.min(reconnectDelay * 2, 30000);
                     }
                 };
 
@@ -161,11 +172,15 @@ export default function ChatPage() {
         }
     };
 
+    const handleBackToList = () => {
+        setShowChatPanel(false);
+    };
 
     const sendMessage = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if ((!inputText.trim() && !attachment && !voiceNote) || !activeConversation) return;
+        if ((!inputText.trim() && !attachment && !voiceNote) || !activeConversation || sending) return;
 
+        setSending(true);
         try {
             const formData = new FormData();
             formData.append('conversation', activeConversation.id);
@@ -175,24 +190,24 @@ export default function ChatPage() {
                 formData.append('voice_note', new File([voiceNote], 'voice_note.wav', { type: 'audio/wav' }));
             }
 
+            setInputText('');
+            setAttachment(null);
+            clearVoiceNote();
+
             const response = await api.post('/chat/messages/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            // Optimistically update the UI with the sent message immediately
             if (response.data && response.data.id) {
                 setMessages(prev => {
-                    // Check if WebSocket already injected it to prevent duplicates
                     if (prev.some(m => m.id === response.data.id)) return prev;
                     return [...prev, response.data];
                 });
             }
-
-            setInputText('');
-            setAttachment(null);
-            clearVoiceNote();
         } catch (error) {
             console.error("Failed to send message", error);
+        } finally {
+            setSending(false);
         }
     };
 
@@ -212,192 +227,235 @@ export default function ChatPage() {
         (u.last_name && u.last_name.toLowerCase().includes(userSearchQuery.toLowerCase()))
     );
 
-    return (
-        <div className="h-[calc(100vh-120px)] w-full max-w-7xl mx-auto rounded-2xl border border-[#721C97]/30 bg-[#070308]/60 shadow-2xl overflow-hidden flex animate-fade-in backdrop-blur-xl">
-            <div className="w-80 shrink-0 border-r border-[#721C97]/30 flex flex-col bg-[#110A15]/80">
-                <div className="h-16 border-b border-[#721C97]/30 flex items-center justify-between px-4">
-                    <h2 className="text-lg font-bold text-white">Conversations</h2>
-                    <button
-                        onClick={() => {
-                            setIsNewChatModalOpen(true);
-                            fetchAvailableUsers();
-                        }}
-                        className="p-2 bg-[#721C97]/20 text-[#C1FF72] rounded-full hover:bg-[#721C97]/40 transition-colors"
-                    >
-                        <FiPlus className="w-5 h-5" />
-                    </button>
-                </div>
+    // ============== Conversation List Panel ==============
+    const conversationListPanel = (
+        <div className={`${showChatPanel ? 'hidden md:flex' : 'flex'} w-full md:w-80 md:shrink-0 border-r border-[#721C97]/30 flex-col bg-[#110A15]/80 h-full`}>
+            <div className="h-14 md:h-16 border-b border-[#721C97]/30 flex items-center justify-between px-4 shrink-0">
+                <h2 className="text-base md:text-lg font-bold text-white">Conversations</h2>
+                <button
+                    onClick={() => {
+                        setIsNewChatModalOpen(true);
+                        fetchAvailableUsers();
+                    }}
+                    className="p-2 bg-[#721C97]/20 text-[#C1FF72] rounded-full hover:bg-[#721C97]/40 transition-colors"
+                >
+                    <FiPlus className="w-5 h-5" />
+                </button>
+            </div>
 
-                <div className="p-3">
-                    <div className="relative">
-                        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                        <input
-                            type="text"
-                            placeholder="Search chats..."
-                            className="w-full bg-[#070308] border border-[#721C97]/30 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-[#C1FF72]"
-                        />
-                    </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    {loading ? (
-                        <div className="flex justify-center p-6"><div className="w-6 h-6 border-2 border-[#C1FF72] border-b-transparent rounded-full animate-spin"></div></div>
-                    ) : conversations.length === 0 ? (
-                        <div className="p-6 text-center text-gray-500 text-sm">No conversations yet.</div>
-                    ) : (
-                        conversations.map(conv => {
-                            const convName = getConversationName(conv);
-                            return (
-                                <div
-                                    key={conv.id}
-                                    onClick={() => selectConversation(conv)}
-                                    className={`flex items-center gap-3 p-3 cursor-pointer transition-colors border-l-2 ${activeConversation?.id === conv.id ? 'bg-[#721C97]/20 border-[#C1FF72]' : 'border-transparent hover:bg-white/5'}`}
-                                >
-                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#721C97] to-[#110A15] shrink-0 flex items-center justify-center font-bold text-[#C1FF72]">
-                                        {getConversationInitial(conv)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-white truncate text-sm">
-                                            {convName}
-                                        </h3>
-                                        <p className="text-sm text-gray-400 truncate">
-                                            {conv.last_message ? conv.last_message.content : 'New chat'}
-                                        </p>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )}
+            <div className="p-2 md:p-3 shrink-0">
+                <div className="relative">
+                    <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <input
+                        type="text"
+                        placeholder="Search chats..."
+                        className="w-full bg-[#070308] border border-[#721C97]/30 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-[#C1FF72]"
+                    />
                 </div>
             </div>
 
-            {activeConversation ? (
-                <div className="flex-1 flex flex-col bg-[#070308]/50">
-                    <div className="h-16 border-b border-[#721C97]/30 flex items-center px-6 bg-[#110A15]/80 shrink-0 gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#721C97] to-[#110A15] flex items-center justify-center font-bold text-[#C1FF72]">
-                            {getConversationInitial(activeConversation)}
-                        </div>
-                        <h2 className="font-bold text-white text-base">
-                            {getConversationName(activeConversation)}
-                        </h2>
-                    </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                {loading ? (
+                    <div className="flex justify-center p-6"><div className="w-6 h-6 border-2 border-[#C1FF72] border-b-transparent rounded-full animate-spin"></div></div>
+                ) : conversations.length === 0 ? (
+                    <div className="p-6 text-center text-gray-500 text-sm">No conversations yet.</div>
+                ) : (
+                    conversations.map(conv => {
+                        const convName = getConversationName(conv);
+                        return (
+                            <div
+                                key={conv.id}
+                                onClick={() => selectConversation(conv)}
+                                className={`flex items-center gap-3 p-3 cursor-pointer transition-colors border-l-2 ${activeConversation?.id === conv.id ? 'bg-[#721C97]/20 border-[#C1FF72]' : 'border-transparent hover:bg-white/5'}`}
+                            >
+                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#721C97] to-[#110A15] shrink-0 flex items-center justify-center font-bold text-[#C1FF72] text-sm md:text-base">
+                                    {getConversationInitial(conv)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-white truncate text-sm">
+                                        {convName}
+                                    </h3>
+                                    <p className="text-xs md:text-sm text-gray-400 truncate">
+                                        {conv.last_message ? conv.last_message.content : 'New chat'}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+        </div>
+    );
 
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-                        {messages.map((msg, idx) => {
-                            const isMe = (msg.sender?.id || msg.sender_id) === myUserId;
-                            return (
-                                <div key={msg.id || idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-[15px] ${isMe
-                                        ? 'bg-gradient-to-br from-[#721C97] to-[#5a157a] text-white rounded-tr-sm'
-                                        : 'bg-[#110A15] border border-[#721C97]/30 text-gray-200 rounded-tl-sm'
-                                        }`}>
-                                        <p className="break-words">{msg.message || msg.content}</p>
+    // ============== Chat Panel ==============
+    const chatPanel = activeConversation ? (
+        <div className={`${showChatPanel ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-[#070308]/50 h-full`}>
+            {/* Chat Header */}
+            <div className="h-14 md:h-16 border-b border-[#721C97]/30 flex items-center px-3 md:px-6 bg-[#110A15]/80 shrink-0 gap-2 md:gap-3">
+                {/* Back button - mobile only */}
+                <button
+                    onClick={handleBackToList}
+                    className="md:hidden p-2 -ml-1 text-gray-400 hover:text-white transition-colors"
+                >
+                    <FiArrowLeft className="w-5 h-5" />
+                </button>
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#721C97] to-[#110A15] flex items-center justify-center font-bold text-[#C1FF72] text-sm">
+                    {getConversationInitial(activeConversation)}
+                </div>
+                <h2 className="font-bold text-white text-sm md:text-base truncate">
+                    {getConversationName(activeConversation)}
+                </h2>
+            </div>
 
-                                        {resolveMediaUrl(msg.attachment) && (
-                                            <div className="mt-2 text-white">
-                                                {resolveMediaUrl(msg.attachment)!.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-                                                    <img src={resolveMediaUrl(msg.attachment)!} alt="Attachment" className="max-w-full sm:max-w-[250px] rounded-lg border border-white/20" />
-                                                ) : (
-                                                    <a href={resolveMediaUrl(msg.attachment)!} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline opacity-90 hover:opacity-100 p-2 bg-black/20 rounded-lg">
-                                                        <FiFileText /> View Attachment
-                                                    </a>
-                                                )}
-                                            </div>
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 custom-scrollbar">
+                {messages.map((msg, idx) => {
+                    const isMe = (msg.sender?.id || msg.sender_id) === myUserId;
+                    const attachmentUrl = resolveMediaUrl(msg.attachment);
+                    const voiceUrl = resolveMediaUrl(msg.voice_note);
+
+                    return (
+                        <div key={msg.id || idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-3 md:px-4 py-2 text-[14px] md:text-[15px] ${isMe
+                                ? 'bg-gradient-to-br from-[#721C97] to-[#5a157a] text-white rounded-tr-sm'
+                                : 'bg-[#110A15] border border-[#721C97]/30 text-gray-200 rounded-tl-sm'
+                                }`}>
+                                {/* Text content */}
+                                {(msg.message || msg.content) && (
+                                    <p className="break-words">{msg.message || msg.content}</p>
+                                )}
+
+                                {/* Image or file attachment */}
+                                {attachmentUrl && (
+                                    <div className="mt-2 text-white">
+                                        {isImageUrl(attachmentUrl) ? (
+                                            <img
+                                                src={attachmentUrl}
+                                                alt="Attachment"
+                                                className="max-w-full rounded-lg border border-white/20 cursor-pointer"
+                                                style={{ maxHeight: '300px', objectFit: 'contain' }}
+                                                onClick={() => window.open(attachmentUrl, '_blank')}
+                                                onError={(e) => {
+                                                    // If image fails, show as file link instead
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.style.display = 'none';
+                                                    const link = document.createElement('a');
+                                                    link.href = attachmentUrl;
+                                                    link.target = '_blank';
+                                                    link.className = 'flex items-center gap-2 text-sm underline opacity-90 hover:opacity-100 p-2 bg-black/20 rounded-lg';
+                                                    link.innerHTML = '📎 View Attachment';
+                                                    target.parentElement?.appendChild(link);
+                                                }}
+                                            />
+                                        ) : (
+                                            <a href={attachmentUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline opacity-90 hover:opacity-100 p-2 bg-black/20 rounded-lg">
+                                                <FiFileText /> View Attachment
+                                            </a>
                                         )}
-
-                                        {resolveMediaUrl(msg.voice_note) && (
-                                            <div className="mt-2">
-                                                <audio controls src={resolveMediaUrl(msg.voice_note)!} className="max-w-[200px] h-10 rounded shadow" />
-                                            </div>
-                                        )}
-
-                                        <div className={`text-[10px] mt-1 text-right ${isMe ? 'opacity-80' : 'opacity-50'}`}>
-                                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                        <div ref={messagesEndRef} />
-                    </div>
+                                )}
 
-                    {/* Attachments & Voice Previews */}
-                    {(attachment || voiceNote) && (
-                        <div className="px-4 py-2 border-t border-[#721C97]/30 bg-[#110A15]/90 flex gap-3 items-center">
-                            {attachment && (
-                                <div className="flex items-center gap-2 bg-[#721C97]/20 px-3 py-1.5 rounded-lg border border-[#721C97]/50">
-                                    {attachment.type.startsWith('image/') ? <FiImage className="text-[#C1FF72]" /> : <FiFileText className="text-[#C1FF72]" />}
-                                    <span className="text-sm text-gray-200 truncate max-w-[200px]">{attachment.name}</span>
-                                    <button type="button" onClick={() => setAttachment(null)} className="text-red-400 hover:text-red-300 ml-2">×</button>
+                                {/* Voice note */}
+                                {voiceUrl && (
+                                    <div className="mt-2">
+                                        <audio controls src={voiceUrl} className="w-full max-w-[250px] h-10 rounded shadow" />
+                                    </div>
+                                )}
+
+                                <div className={`text-[10px] mt-1 text-right ${isMe ? 'opacity-80' : 'opacity-50'}`}>
+                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </div>
-                            )}
-                            {voiceNote && (
-                                <div className="flex items-center gap-2 bg-[#721C97]/20 px-3 py-1.5 rounded-lg border border-[#721C97]/50">
-                                    <FiMic className="text-[#C1FF72]" />
-                                    <audio controls src={URL.createObjectURL(voiceNote)} className="h-8 max-w-[180px]" />
-                                    <button type="button" onClick={clearVoiceNote} className="text-red-400 hover:text-red-300 ml-2">×</button>
-                                </div>
-                            )}
+                            </div>
+                        </div>
+                    );
+                })}
+                <div ref={messagesEndRef} />
+            </div>
+
+            {/* Attachments & Voice Previews */}
+            {(attachment || voiceNote) && (
+                <div className="px-3 md:px-4 py-2 border-t border-[#721C97]/30 bg-[#110A15]/90 flex gap-2 md:gap-3 items-center flex-wrap shrink-0">
+                    {attachment && (
+                        <div className="flex items-center gap-2 bg-[#721C97]/20 px-3 py-1.5 rounded-lg border border-[#721C97]/50 max-w-full">
+                            {attachment.type.startsWith('image/') ? <FiImage className="text-[#C1FF72] shrink-0" /> : <FiFileText className="text-[#C1FF72] shrink-0" />}
+                            <span className="text-sm text-gray-200 truncate max-w-[150px] md:max-w-[200px]">{attachment.name}</span>
+                            <button type="button" onClick={() => setAttachment(null)} className="text-red-400 hover:text-red-300 ml-1 shrink-0">×</button>
                         </div>
                     )}
-
-                    <form onSubmit={sendMessage} className="p-4 border-t border-[#721C97]/30 bg-[#110A15]/80 flex gap-2 items-center">
-                        <input
-                            type="file"
-                            className="hidden"
-                            ref={fileInputRef}
-                            onChange={(e) => {
-                                if (e.target.files && e.target.files[0]) setAttachment(e.target.files[0]);
-                            }}
-                        />
-                        <button type="button" onClick={() => fileInputRef.current?.click()} className="p-3 bg-[#721C97]/20 text-[#C1FF72] rounded-xl hover:bg-[#721C97]/40 transition-colors">
-                            <FiPaperclip className="w-5 h-5" />
-                        </button>
-
-                        {isRecording ? (
-                            <div className="flex-1 flex items-center gap-3 bg-[#721C97]/20 border border-red-500/50 rounded-2xl px-4 py-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
-                                <span className="text-red-400 font-mono">{formatTime(recordingTime)}</span>
-                                <button type="button" onClick={cancelRecording} className="ml-auto text-gray-400 hover:text-white text-sm">Cancel</button>
-                                <button type="button" onClick={stopRecording} className="text-[#C1FF72] hover:text-white font-semibold text-sm">Stop</button>
-                            </div>
-                        ) : (
-                            <>
-                                <button type="button" onClick={startRecording} className="p-3 bg-[#721C97]/20 text-[#C1FF72] rounded-xl hover:bg-[#721C97]/40 transition-colors">
-                                    <FiMic className="w-5 h-5" />
-                                </button>
-                                <input
-                                    type="text"
-                                    value={inputText}
-                                    onChange={(e) => setInputText(e.target.value)}
-                                    placeholder="Type a message..."
-                                    className="flex-1 bg-[#070308] border border-[#721C97]/50 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-[#C1FF72]"
-                                />
-                            </>
-                        )}
-
-                        <button type="submit" disabled={!inputText.trim() && !attachment && !voiceNote} className="p-3 bg-[#C1FF72] text-[#070308] rounded-xl hover:bg-[#aef552] transition-colors disabled:opacity-50 flex items-center justify-center">
-                            <FiSend className="w-5 h-5" />
-                        </button>
-                    </form>
-                </div>
-            ) : (
-                <div className="flex-1 flex flex-col items-center justify-center bg-[#070308]/50 text-gray-500">
-                    <FiMessageSquare className="w-12 h-12 mb-4 opacity-50" />
-                    <p>Select a chat to begin messaging.</p>
+                    {voiceNote && (
+                        <div className="flex items-center gap-2 bg-[#721C97]/20 px-3 py-1.5 rounded-lg border border-[#721C97]/50">
+                            <FiMic className="text-[#C1FF72] shrink-0" />
+                            <audio controls src={URL.createObjectURL(voiceNote)} className="h-8 max-w-[140px] md:max-w-[180px]" />
+                            <button type="button" onClick={clearVoiceNote} className="text-red-400 hover:text-red-300 ml-1 shrink-0">×</button>
+                        </div>
+                    )}
                 </div>
             )}
+
+            {/* Input Bar */}
+            <form onSubmit={sendMessage} className="p-2 md:p-4 border-t border-[#721C97]/30 bg-[#110A15]/80 flex gap-1.5 md:gap-2 items-center shrink-0">
+                <input
+                    type="file"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) setAttachment(e.target.files[0]);
+                    }}
+                />
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2.5 md:p-3 bg-[#721C97]/20 text-[#C1FF72] rounded-xl hover:bg-[#721C97]/40 transition-colors shrink-0">
+                    <FiPaperclip className="w-4 h-4 md:w-5 md:h-5" />
+                </button>
+
+                {isRecording ? (
+                    <div className="flex-1 flex items-center gap-2 md:gap-3 bg-[#721C97]/20 border border-red-500/50 rounded-2xl px-3 md:px-4 py-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse shrink-0"></div>
+                        <span className="text-red-400 font-mono text-sm">{formatTime(recordingTime)}</span>
+                        <button type="button" onClick={cancelRecording} className="ml-auto text-gray-400 hover:text-white text-xs md:text-sm">Cancel</button>
+                        <button type="button" onClick={stopRecording} className="text-[#C1FF72] hover:text-white font-semibold text-xs md:text-sm">Stop</button>
+                    </div>
+                ) : (
+                    <>
+                        <button type="button" onClick={startRecording} className="p-2.5 md:p-3 bg-[#721C97]/20 text-[#C1FF72] rounded-xl hover:bg-[#721C97]/40 transition-colors shrink-0">
+                            <FiMic className="w-4 h-4 md:w-5 md:h-5" />
+                        </button>
+                        <input
+                            type="text"
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            placeholder="Type a message..."
+                            className="flex-1 min-w-0 bg-[#070308] border border-[#721C97]/50 rounded-2xl px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base text-white focus:outline-none focus:border-[#C1FF72]"
+                        />
+                    </>
+                )}
+
+                <button type="submit" disabled={sending || (!inputText.trim() && !attachment && !voiceNote)} className="p-2.5 md:p-3 bg-[#C1FF72] text-[#070308] rounded-xl hover:bg-[#aef552] transition-colors disabled:opacity-50 flex items-center justify-center shrink-0">
+                    <FiSend className="w-4 h-4 md:w-5 md:h-5" />
+                </button>
+            </form>
+        </div>
+    ) : (
+        <div className={`${showChatPanel ? 'flex' : 'hidden md:flex'} flex-1 flex-col items-center justify-center bg-[#070308]/50 text-gray-500`}>
+            <FiMessageSquare className="w-12 h-12 mb-4 opacity-50" />
+            <p>Select a chat to begin messaging.</p>
+        </div>
+    );
+
+    return (
+        <div className="h-[calc(100vh-80px)] md:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto rounded-none md:rounded-2xl border-0 md:border border-[#721C97]/30 bg-[#070308]/60 shadow-2xl overflow-hidden flex animate-fade-in backdrop-blur-xl">
+            {conversationListPanel}
+            {chatPanel}
+
             {/* New Chat Modal */}
             {isNewChatModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-[#110A15] border border-[#721C97]/50 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-fade-in">
-                        <div className="p-4 border-b border-[#721C97]/30 flex justify-between items-center">
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#110A15] border border-[#721C97]/50 rounded-t-2xl md:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-fade-in max-h-[85vh] md:max-h-[80vh] flex flex-col">
+                        <div className="p-4 border-b border-[#721C97]/30 flex justify-between items-center shrink-0">
                             <h3 className="text-lg font-bold text-white">New Conversation</h3>
                             <button onClick={() => setIsNewChatModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
-                        <div className="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                        <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
                             <div className="mb-4">
                                 <div className="relative">
                                     <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -455,7 +513,7 @@ export default function ChatPage() {
                                 )}
                             </div>
                         </div>
-                        <div className="p-4 border-t border-[#721C97]/30 flex justify-end gap-3 bg-black/20">
+                        <div className="p-4 border-t border-[#721C97]/30 flex justify-end gap-3 bg-black/20 shrink-0">
                             <button
                                 onClick={() => setIsNewChatModalOpen(false)}
                                 className="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-colors"

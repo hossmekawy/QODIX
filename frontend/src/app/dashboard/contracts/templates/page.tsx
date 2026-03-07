@@ -34,30 +34,32 @@ export default function TemplatesPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Link href="/dashboard/contracts" className="p-2 text-gray-400 hover:text-white bg-white/5 rounded-lg transition-colors">
-                    <FiArrowLeft className="w-5 h-5" />
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                        Template Library
-                    </h1>
-                    <p className="text-gray-400 mt-1">Manage document templates and their variables.</p>
+        <div className="w-full max-w-7xl mx-auto space-y-4 md:space-y-6 animate-in fade-in duration-500 pb-10 px-4 md:px-0 mt-4 md:mt-0">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <Link href="/dashboard/contracts" className="p-2 text-gray-400 hover:text-white bg-white/5 rounded-lg transition-colors shrink-0">
+                        <FiArrowLeft className="w-5 h-5" />
+                    </Link>
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                            Template Library
+                        </h1>
+                        <p className="text-sm md:text-base text-gray-400 mt-1">Manage document templates and their variables.</p>
+                    </div>
                 </div>
-                <div className="ml-auto flex gap-3">
+                <div className="flex flex-col md:flex-row gap-2 md:gap-3 w-full md:w-auto md:ml-auto mt-2 md:mt-0">
                     <Link
                         href="/dashboard/contracts/templates/guide"
-                        className="flex items-center gap-2 bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:border-[#721C97]/50 px-5 py-2.5 rounded-xl transition-all font-medium"
+                        className="w-full md:w-auto flex justify-center items-center gap-2 bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:border-[#721C97]/50 px-5 py-2.5 rounded-xl transition-all font-medium text-sm md:text-base"
                     >
                         <FiBook className="w-4 h-4 text-[#C1FF72]" />
                         How to create templates
                     </Link>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="flex items-center gap-2 bg-[#C1FF72] text-[#070308] px-5 py-2.5 rounded-xl hover:bg-[#aee661] transition-all font-semibold shadow-[0_0_15px_rgba(193,255,114,0.3)]"
+                        className="w-full md:w-auto flex justify-center items-center gap-2 bg-[#C1FF72] text-[#070308] px-5 py-2.5 rounded-xl hover:bg-[#aee661] transition-all font-semibold shadow-[0_0_15px_rgba(193,255,114,0.3)] text-sm md:text-base"
                     >
-                        <FiPlus className="w-5 h-5" />
+                        <FiPlus className="w-4 h-4 md:w-5 md:h-5" />
                         Upload Template
                     </button>
                 </div>
@@ -65,19 +67,19 @@ export default function TemplatesPage() {
 
             {/* Empty state helper banner */}
             {templates.length === 0 && (
-                <div className="bg-[#721C97]/10 border border-[#721C97]/30 rounded-2xl p-6 flex items-center gap-5">
+                <div className="bg-[#721C97]/10 border border-[#721C97]/30 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-5">
                     <div className="bg-[#721C97]/20 p-3 rounded-xl border border-[#721C97]/30 shrink-0">
-                        <FiBook className="w-6 h-6 text-[#C1FF72]" />
+                        <FiBook className="w-5 h-5 md:w-6 md:h-6 text-[#C1FF72]" />
                     </div>
                     <div className="flex-1">
                         <h3 className="font-semibold text-white mb-1">No templates yet</h3>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-xs md:text-sm text-gray-400">
                             Upload your first Word document (.docx) template. Not sure how to create one?
                         </p>
                     </div>
                     <Link
                         href="/dashboard/contracts/templates/guide"
-                        className="shrink-0 text-sm text-[#C1FF72] hover:underline font-medium whitespace-nowrap"
+                        className="shrink-0 text-xs md:text-sm text-[#C1FF72] hover:underline font-medium whitespace-nowrap"
                     >
                         Read the guide →
                     </Link>

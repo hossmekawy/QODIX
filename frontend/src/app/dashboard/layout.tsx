@@ -24,7 +24,7 @@ export default function DashboardLayout({
                     )}
                     <div className="flex flex-1 flex-col overflow-hidden min-w-0">
                         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-                        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-[#070308] to-[#110A15] p-5 lg:p-10 custom-scrollbar relative">
+                        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-b from-[#070308] to-[#110A15] p-5 lg:p-10 custom-scrollbar relative">
                             {/* Decorative glow effects */}
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#721C97]/10 blur-[120px] rounded-full pointer-events-none" />
 

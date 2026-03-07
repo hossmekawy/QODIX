@@ -20,6 +20,12 @@ export function useAudioRecorder() {
 
     const startRecording = useCallback(async () => {
         try {
+            // navigator.mediaDevices requires a secure context (HTTPS or localhost)
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('Voice recording requires HTTPS. Microphone access is blocked on HTTP connections by the browser.');
+                return;
+            }
+
             // Get microphone stream
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
@@ -41,7 +47,6 @@ export function useAudioRecorder() {
             sourceRef.current = source;
 
             // Create ScriptProcessor to capture raw PCM data
-            // bufferSize=4096 is a good balance between latency and performance
             const processor = audioContext.createScriptProcessor(4096, 1, 1);
             processorRef.current = processor;
 
@@ -49,7 +54,6 @@ export function useAudioRecorder() {
 
             processor.onaudioprocess = (e) => {
                 const inputData = e.inputBuffer.getChannelData(0);
-                // Copy the data since the buffer gets reused
                 chunksRef.current.push(new Float32Array(inputData));
             };
 
@@ -65,8 +69,13 @@ export function useAudioRecorder() {
                 setRecordingTime(prev => prev + 1);
             }, 1000);
 
-        } catch (err) {
-            console.error('Microphone access denied:', err);
+        } catch (err: any) {
+            if (err.name === 'NotAllowedError') {
+                alert('Microphone permission was denied. Please allow microphone access in your browser settings.');
+            } else {
+                console.error('Microphone access error:', err);
+                alert('Could not access microphone. Please check your browser settings.');
+            }
         }
     }, []);
 

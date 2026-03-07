@@ -43,8 +43,9 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
             .catch(() => { });
 
         // Connect to notification WebSocket
-        const host = typeof window !== 'undefined' ? window.location.hostname : '127.0.0.1';
-        const wsUrl = `ws://${host}:8000/ws/notifications/?token=${token}`;
+        const host = typeof window !== 'undefined' ? window.location.host : '127.0.0.1:9000';
+        const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${host}/ws/notifications/?token=${token}`;
         let reconnectTimer: ReturnType<typeof setTimeout>;
         let isComponentMounted = true;
         let reconnectDelay = 5000;

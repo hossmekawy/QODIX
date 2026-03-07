@@ -46,7 +46,7 @@ export default function ProjectsPage() {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+        <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500 pb-20 px-4 md:px-0 pt-4 md:pt-0">
             {/* Header section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#721C97]/30 pb-6 relative">
                 <div className="absolute -top-10 -left-10 w-48 h-48 bg-[#721C97]/20 blur-[60px] pointer-events-none rounded-full"></div>

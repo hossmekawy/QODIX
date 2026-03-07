@@ -64,3 +64,49 @@ class UserDeleteView(generics.DestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = (IsManagerOrAdmin,)
 
+from .serializers import ChangePasswordSerializer, ChangePINSerializer
+
+class ChangePasswordView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangePasswordSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            if not user.check_password(serializer.validated_data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user.set_password(serializer.validated_data.get("new_password"))
+            user.save()
+            return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ChangePINView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangePINSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            old_pin = serializer.validated_data.get("old_pin", "")
+            
+            if user.pin and user.pin != old_pin:
+                return Response({"old_pin": ["Wrong PIN."]}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user.pin = serializer.validated_data.get("new_pin")
+            user.save()
+            return Response({"detail": "PIN updated successfully."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

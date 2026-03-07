@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import {
     FiTrendingUp, FiTrendingDown, FiDollarSign, FiUsers,
     FiActivity, FiFileText, FiBriefcase, FiAperture,
-    FiPlusCircle, FiSettings, FiGrid, FiList, FiCheckCircle
+    FiPlusCircle, FiSettings, FiGrid, FiList, FiCheckCircle, FiDownload
 } from 'react-icons/fi';
 import api from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
@@ -17,6 +17,42 @@ export default function GlobalDashboardPage() {
     const toast = useToast();
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<any>(null);
+    const [showInstallBanner, setShowInstallBanner] = useState(true);
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+    // Listen for the browser's install prompt event
+    useEffect(() => {
+        const handler = (e: any) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+        window.addEventListener('beforeinstallprompt', handler);
+        // Hide banner if already installed as standalone
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            setShowInstallBanner(false);
+        }
+        return () => window.removeEventListener('beforeinstallprompt', handler);
+    }, []);
+
+    const handleInstallClick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') setShowInstallBanner(false);
+            setDeferredPrompt(null);
+        } else {
+            // Fallback: guide user to browser's add to home screen
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            if (isIOS) {
+                alert('To install QODIX:\n\n1. Tap the Share button (square with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
+            } else if (isAndroid) {
+                alert('To install QODIX:\n\n1. Tap the ⋮ menu (three dots)\n2. Tap "Add to Home screen"\n3. Tap "Add"');
+            } else {
+                alert('To install QODIX:\n\n1. Click the install icon in your browser\'s address bar\n\nOr use your browser\'s menu → "Install app" or "Add to Home screen"');
+            }
+        }
+    };
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -62,27 +98,38 @@ export default function GlobalDashboardPage() {
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-6">
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/10 pb-4 md:pb-6">
                 <div>
-                    <h1 className="text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
-                        <FiAperture className="text-[#C1FF72] animate-pulse" />
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
+                        <FiAperture className="text-[#C1FF72] animate-pulse shrink-0" />
                         Mission Control
                     </h1>
-                    <p className="text-gray-400 mt-2">Welcome back. Here is your global system overview.</p>
+                    <p className="text-sm md:text-base text-gray-400 mt-2">Welcome back. Here is your global system overview.</p>
                 </div>
-                <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                    <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-sm font-bold text-white uppercase tracking-widest">{data.system.status}</span>
-                    <span className="text-xs text-gray-400 ml-2">({data.system.active_users} Users Active)</span>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
+                    {showInstallBanner && (
+                        <button
+                            onClick={handleInstallClick}
+                            className="flex items-center justify-center gap-2 bg-[#721C97]/20 border border-[#721C97]/50 hover:bg-[#721C97]/40 px-4 py-2.5 rounded-xl transition-all w-full sm:w-auto text-[#C1FF72]"
+                        >
+                            <FiDownload className="w-4 h-4" />
+                            <span className="text-xs md:text-sm font-bold uppercase tracking-wider">Install App</span>
+                        </button>
+                    )}
+                    <div className="flex items-center justify-center gap-3 bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl w-full sm:w-auto">
+                        <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                        <span className="text-xs md:text-sm font-bold text-white uppercase tracking-widest">{data.system.status}</span>
+                        <span className="text-xs text-gray-400 ml-2">({data.system.active_users} Users Active)</span>
+                    </div>
                 </div>
             </div>
 
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {/* Finance Stats */}
-                <div className="bg-[#110915] p-6 rounded-2xl border border-white/10 flex flex-col relative overflow-hidden group hover:border-[#C1FF72]/50 transition-colors">
+                <div className="bg-[#110915] p-5 md:p-6 rounded-2xl border border-white/10 flex flex-col relative overflow-hidden group hover:border-[#C1FF72]/50 transition-colors">
                     <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#C1FF72]/10 rounded-full blur-2xl group-hover:bg-[#C1FF72]/20 transition-all"></div>
-                    <p className="text-sm text-gray-400 font-bold tracking-widest uppercase mb-1 flex items-center gap-2">
+                    <p className="text-xs md:text-sm text-gray-400 font-bold tracking-widest uppercase mb-1 flex items-center gap-2">
                         <FiDollarSign className="text-[#C1FF72]" /> This Month
                     </p>
                     <h3 className="text-3xl font-black text-white mt-2">{formatCurrency(data.finance.revenue_this_month)}</h3>
@@ -134,17 +181,17 @@ export default function GlobalDashboardPage() {
             </div>
 
             {/* Charts & Visualizations */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
 
                 {/* Main Area Chart */}
-                <div className="lg:col-span-2 bg-[#070308] border border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <div className="lg:col-span-2 bg-[#070308] border border-white/10 rounded-3xl p-4 md:p-6 shadow-2xl flex flex-col">
+                    <div className="flex justify-between items-center mb-4 md:mb-6">
+                        <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                             <FiTrendingUp className="text-[#C1FF72]" /> Revenue Growth
                         </h3>
-                        <div className="bg-white/5 px-3 py-1 rounded-lg text-xs font-bold text-gray-400 border border-white/10">Year to Date</div>
+                        <div className="bg-white/5 px-2 py-1 md:px-3 rounded-lg text-[10px] md:text-xs font-bold text-gray-400 border border-white/10">Year to Date</div>
                     </div>
-                    <div className="h-[300px] w-full flex-grow">
+                    <div className="h-[200px] md:h-[300px] w-full flex-grow">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
@@ -233,15 +280,15 @@ export default function GlobalDashboardPage() {
             </div>
 
             {/* Active Projects Live Progress Row */}
-            <div className="bg-[#070308] border border-white/10 rounded-3xl p-6 shadow-2xl">
-                <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <div className="bg-[#070308] border border-white/10 rounded-3xl p-4 md:p-6 shadow-2xl flex flex-col">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 md:mb-6 border-b border-white/10 pb-4">
+                    <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                         <FiBriefcase className="text-blue-400" /> Active Projects Progress
                     </h3>
-                    <Link href="/dashboard/projects" className="text-sm text-blue-400 hover:text-white transition-colors">Manage Pipeline</Link>
+                    <Link href="/dashboard/projects" className="text-xs md:text-sm text-blue-400 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-lg w-full sm:w-auto text-center border border-white/10">Manage Pipeline</Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 md:gap-4 overflow-x-hidden">
                     {data.projects.recent_progress && data.projects.recent_progress.length > 0 ? (
                         data.projects.recent_progress.map((project: any) => (
                             <Link href={`/dashboard/projects/${project.id}`} key={project.id} className="block group">
@@ -278,9 +325,9 @@ export default function GlobalDashboardPage() {
             </div>
 
             {/* Quick Navigation / Action Bar */}
-            <div className="pt-6">
-                <h3 className="text-lg font-bold text-white mb-4">Quick Navigation</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="pt-4 md:pt-6">
+                <h3 className="text-base md:text-lg font-bold text-white mb-4">Quick Navigation</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
 
                     <Link href="/dashboard/finance/invoices/new" className="bg-[#C1FF72] text-[#070308] hover:bg-white p-4 rounded-2xl transition-all shadow-lg hover:shadow-[#C1FF72]/20 group flex flex-col items-center justify-center text-center gap-2">
                         <FiPlusCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />

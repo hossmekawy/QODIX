@@ -101,15 +101,15 @@ export default function APIsTab() {
     };
 
     return (
-        <div className="bg-[#070308] border border-amber-500/30 rounded-2xl p-6 shadow-lg animate-in fade-in">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-white">Third-Party API Credentials</h2>
-                <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-500 rounded-xl hover:bg-amber-500/40 transition-colors border border-amber-500/50 font-bold">
+        <div className="bg-[#070308] border border-amber-500/30 rounded-2xl p-4 md:p-6 shadow-lg animate-in fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 md:mb-6">
+                <h2 className="text-lg md:text-xl font-bold text-white">Third-Party API Credentials</h2>
+                <button onClick={openCreateModal} className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-500 rounded-xl hover:bg-amber-500/40 transition-colors border border-amber-500/50 font-bold text-sm md:text-base">
                     <FiPlus /> Add API Key
                 </button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-sm text-gray-400">
                     <thead className="text-xs uppercase bg-amber-500/10 text-gray-300 border-b border-amber-500/30">
                         <tr>
@@ -178,10 +178,10 @@ export default function APIsTab() {
 
             {/* Create/Edit Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-amber-500/50 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_40px_rgba(245,158,11,0.2)]">
-                        <div className="p-6 border-b border-amber-500/20 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
-                            <h2 className="text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit API Key' : 'Store New API Key'}</h2>
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-amber-500/50 md:rounded-2xl rounded-t-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(245,158,11,0.2)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-amber-500/20 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
+                            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit API Key' : 'Store New API Key'}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-lg transition-colors">✕</button>
                         </div>
                         <form onSubmit={handleSave} className="p-6 space-y-4">
@@ -211,9 +211,9 @@ export default function APIsTab() {
                                 <textarea rows={3} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-amber-500 transition-colors custom-scrollbar" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="Usage instructions, limits, associated email..."></textarea>
                             </div>
 
-                            <div className="flex gap-3 justify-end pt-4 border-t border-amber-500/20 mt-6 sticky bottom-0 bg-[#070308] py-4">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors">Cancel</button>
-                                <button type="submit" className="px-6 py-2.5 rounded-xl bg-amber-500 text-[#070308] font-bold hover:bg-amber-400 transition-colors shadow-[0_0_15px_rgba(245,158,11,0.3)]">{isEditing ? 'Save Details' : 'Secure API Key'}</button>
+                            <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-3 justify-end pt-4 border-t border-amber-500/20 mt-6 sticky bottom-0 bg-[#070308] py-4 px-4 md:px-6">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="w-full md:w-auto px-6 py-2.5 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors">Cancel</button>
+                                <button type="submit" className="w-full md:w-auto px-6 py-2.5 rounded-xl bg-amber-500 text-[#070308] font-bold hover:bg-amber-400 transition-colors shadow-[0_0_15px_rgba(245,158,11,0.3)]">{isEditing ? 'Save Details' : 'Secure API Key'}</button>
                             </div>
                         </form>
                     </div>

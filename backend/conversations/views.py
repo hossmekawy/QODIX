@@ -97,6 +97,9 @@ class MessageViewSet(viewsets.ModelViewSet):
         # update conversation updated_at
         msg.conversation.save()
 
+        # Get channel layer ONCE, used for both notifications and chat broadcast
+        channel_layer = get_channel_layer()
+
         # --- Create Notifications for other participants ---
         sender_name = f"{self.request.user.first_name} {self.request.user.last_name}".strip() or self.request.user.email
         content_preview = (msg.content or '')[:80]
@@ -129,7 +132,6 @@ class MessageViewSet(viewsets.ModelViewSet):
                 )
 
         # Broadcast over WebSockets
-        channel_layer = get_channel_layer()
         serialized_msg = self.get_serializer(msg, context={'request': self.request}).data
         async_to_sync(channel_layer.group_send)(
             f'chat_{msg.conversation.id}',

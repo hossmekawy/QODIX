@@ -19,7 +19,7 @@ export default function LoginPage() {
         // If user is already logged in, redirect to dashboard
         const token = localStorage.getItem('access_token');
         if (token) {
-            router.replace('/dashboard/profile');
+            router.replace('/dashboard');
         }
     }, [router]);
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
                     password,
                 });
                 localStorage.setItem('access_token', res.data.access);
-                router.push('/dashboard/profile');
+                router.push('/dashboard');
             } else {
                 const res = await api.post('/accounts/pin-login/', {
                     username_or_email: identifier,
@@ -41,7 +41,7 @@ export default function LoginPage() {
                 });
                 localStorage.setItem('access_token', res.data.access);
                 toast.success('Successfully logged in.');
-                router.push('/dashboard/profile');
+                router.push('/dashboard');
             }
         } catch (err: any) {
             const data = err.response?.data;

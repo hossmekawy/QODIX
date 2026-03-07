@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { FiDollarSign, FiAlertCircle, FiPlus, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
 
 interface ProjectFinancialsTabProps {
@@ -16,6 +17,8 @@ export default function ProjectFinancialsTab({ projectId, projectBudget }: Proje
 
     const [isLoading, setIsLoading] = useState(true);
     const toast = useToast();
+    const { settings } = useSettings();
+    const currency = settings?.currency || '$';
 
     // Modals
     const [isBugModalOpen, setIsBugModalOpen] = useState(false);
@@ -104,20 +107,20 @@ export default function ProjectFinancialsTab({ projectId, projectBudget }: Proje
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Financial Payments Sector */}
-                <div className="bg-[#070308] border border-white/10 rounded-2xl p-5 shadow-lg">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="bg-[#070308] border border-white/10 rounded-2xl p-4 md:p-5 shadow-lg">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div className="flex items-center gap-2 text-emerald-500">
                             <FiDollarSign className="w-5 h-5 bg-emerald-500/20 rounded p-0.5" />
                             <h3 className="text-lg font-bold text-white">Payment Milestones</h3>
                         </div>
-                        <button onClick={() => setIsPaymentModalOpen(true)} className="px-3 py-1.5 bg-emerald-500/20 text-emerald-500 border border-emerald-500/50 rounded-lg font-bold hover:bg-emerald-500/40 text-xs flex gap-1 items-center">
+                        <button onClick={() => setIsPaymentModalOpen(true)} className="w-full md:w-auto justify-center px-3 py-1.5 bg-emerald-500/20 text-emerald-500 border border-emerald-500/50 rounded-lg font-bold hover:bg-emerald-500/40 text-xs flex gap-1 items-center">
                             <FiPlus /> Add Invoice
                         </button>
                     </div>
 
-                    <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex justify-between items-center text-sm">
-                        <span className="text-gray-300">Total Quoted Budget: <strong className="text-white">${parseFloat(projectBudget as any).toLocaleString()}</strong></span>
-                        <span className="text-emerald-500 font-bold">Received: ${totalPaid.toLocaleString()}</span>
+                    <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm">
+                        <span className="text-gray-300">Total Quoted Budget: <strong className="text-white">{currency}{parseFloat(projectBudget as any).toLocaleString()}</strong></span>
+                        <span className="text-emerald-500 font-bold">Received: {currency}{totalPaid.toLocaleString()}</span>
                     </div>
 
                     {isLoading ? <div className="text-center py-4 text-gray-500 italic">Loading...</div> : payments.length === 0 ? (
@@ -129,7 +132,7 @@ export default function ProjectFinancialsTab({ projectId, projectBudget }: Proje
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start mb-1">
                                             <h4 className="font-bold text-white text-base">{pay.title}</h4>
-                                            <span className="text-lg font-black text-emerald-400">${parseFloat(pay.amount).toLocaleString()}</span>
+                                            <span className="text-lg font-black text-emerald-400">{currency}{parseFloat(pay.amount).toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs mt-2">
                                             <span className="text-gray-500">Due: {pay.due_date}</span>
@@ -150,13 +153,13 @@ export default function ProjectFinancialsTab({ projectId, projectBudget }: Proje
                 </div>
 
                 {/* Bug Tracking Sector */}
-                <div className="bg-[#070308] border border-white/10 rounded-2xl p-5 shadow-lg">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="bg-[#070308] border border-white/10 rounded-2xl p-4 md:p-5 shadow-lg">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div className="flex items-center gap-2 text-rose-500">
                             <FiAlertCircle className="w-5 h-5" />
                             <h3 className="text-lg font-bold text-white">QA Bug Tracking</h3>
                         </div>
-                        <button onClick={() => setIsBugModalOpen(true)} className="px-3 py-1.5 bg-rose-500/20 text-rose-400 border border-rose-500/50 rounded-lg font-bold hover:bg-rose-500/40 text-xs flex gap-1 items-center">
+                        <button onClick={() => setIsBugModalOpen(true)} className="w-full md:w-auto justify-center px-3 py-1.5 bg-rose-500/20 text-rose-400 border border-rose-500/50 rounded-lg font-bold hover:bg-rose-500/40 text-xs flex gap-1 items-center">
                             <FiPlus /> Log Bug
                         </button>
                     </div>
@@ -203,19 +206,20 @@ export default function ProjectFinancialsTab({ projectId, projectBudget }: Proje
 
             {/* Payment Modal */}
             {isPaymentModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-emerald-500/30 rounded-2xl w-full max-w-md shadow-[0_0_40px_rgba(16,185,129,0.15)]">
-                        <div className="p-6 border-b border-emerald-500/20">
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-emerald-500/30 md:rounded-2xl rounded-t-2xl w-full max-w-md max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(16,185,129,0.15)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-emerald-500/20 sticky top-0 bg-[#070308] z-10 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-white">Create Payment Milestone</h2>
+                            <button onClick={() => setIsPaymentModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-lg transition-colors"><FiX /></button>
                         </div>
-                        <form onSubmit={handleSavePayment} className="p-6 space-y-4">
+                        <form onSubmit={handleSavePayment} className="p-4 md:p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 mb-1">Invoice / Milestone Title*</label>
                                 <input required type="text" className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-emerald-500" value={paymentData.title} onChange={e => setPaymentData({ ...paymentData, title: e.target.value })} placeholder="e.g. 50% Upfront Deposit" />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-400 mb-1">Amount ($)*</label>
+                                    <label className="block text-xs font-bold text-gray-400 mb-1">Amount ({currency})*</label>
                                     <input required type="number" step="0.01" className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-emerald-500" value={paymentData.amount} onChange={e => setPaymentData({ ...paymentData, amount: e.target.value })} placeholder="0.00" />
                                 </div>
                                 <div>
@@ -223,9 +227,9 @@ export default function ProjectFinancialsTab({ projectId, projectBudget }: Proje
                                     <input required type="date" className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-emerald-500" value={paymentData.due_date} onChange={e => setPaymentData({ ...paymentData, due_date: e.target.value })} />
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-2 pt-4 border-t border-white/10 mt-6">
-                                <button type="button" onClick={() => setIsPaymentModalOpen(false)} className="px-4 py-2 border border-white/10 text-white rounded-lg hover:bg-white/5">Cancel</button>
-                                <button type="submit" className="px-4 py-2 bg-emerald-500 text-[#070308] font-bold rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400">Save Invoice</button>
+                            <div className="flex flex-col-reverse md:flex-row justify-end gap-2 pt-4 border-t border-white/10 mt-6 sticky bottom-0 bg-[#070308] pb-4 md:pb-0 px-4 md:px-0 -mx-4 md:mx-0">
+                                <button type="button" onClick={() => setIsPaymentModalOpen(false)} className="w-full md:w-auto px-4 py-2 border border-white/10 text-white rounded-lg hover:bg-white/5">Cancel</button>
+                                <button type="submit" className="w-full md:w-auto px-4 py-2 bg-emerald-500 text-[#070308] font-bold rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400">Save Invoice</button>
                             </div>
                         </form>
                     </div>
@@ -234,17 +238,18 @@ export default function ProjectFinancialsTab({ projectId, projectBudget }: Proje
 
             {/* Bug Tracking Modal */}
             {isBugModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-rose-500/30 rounded-2xl w-full max-w-lg shadow-[0_0_40px_rgba(244,63,94,0.15)]">
-                        <div className="p-6 border-b border-rose-500/20">
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-rose-500/30 md:rounded-2xl rounded-t-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(244,63,94,0.15)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-rose-500/20 sticky top-0 bg-[#070308] z-10 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-white">Log QA Bug</h2>
+                            <button onClick={() => setIsBugModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-lg transition-colors"><FiX /></button>
                         </div>
-                        <form onSubmit={handleSaveBug} className="p-6 space-y-4">
+                        <form onSubmit={handleSaveBug} className="p-4 md:p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 mb-1">Bug Title*</label>
                                 <input required type="text" className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-rose-500" value={bugData.title} onChange={e => setBugData({ ...bugData, title: e.target.value })} placeholder="e.g. Login button unresponsive on iOS Safari" />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 mb-1">Priority</label>
                                     <select className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-rose-500" value={bugData.priority} onChange={e => setBugData({ ...bugData, priority: e.target.value })}>
@@ -268,9 +273,9 @@ export default function ProjectFinancialsTab({ projectId, projectBudget }: Proje
                                 <label className="block text-xs font-bold text-gray-400 mb-1">Detailed Description & Replication Steps</label>
                                 <textarea required rows={4} className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-3 text-white outline-none focus:border-rose-500 text-sm custom-scrollbar" value={bugData.description} onChange={e => setBugData({ ...bugData, description: e.target.value })} placeholder="Steps to reproduce..."></textarea>
                             </div>
-                            <div className="flex justify-end gap-2 pt-4 border-t border-white/10 mt-6">
-                                <button type="button" onClick={() => setIsBugModalOpen(false)} className="px-5 py-2 border border-white/10 text-white rounded-lg hover:bg-white/5">Cancel</button>
-                                <button type="submit" className="px-5 py-2 bg-rose-500 text-white font-bold rounded-lg shadow-[0_0_15px_rgba(244,63,94,0.3)] hover:bg-rose-400">Log Bug Ticket</button>
+                            <div className="flex flex-col-reverse md:flex-row justify-end gap-2 pt-4 border-t border-white/10 mt-6 sticky bottom-0 bg-[#070308] pb-4 md:pb-0 px-4 md:px-0 -mx-4 md:mx-0">
+                                <button type="button" onClick={() => setIsBugModalOpen(false)} className="w-full md:w-auto px-5 py-2 border border-white/10 text-white rounded-lg hover:bg-white/5">Cancel</button>
+                                <button type="submit" className="w-full md:w-auto px-5 py-2 bg-rose-500 text-white font-bold rounded-lg shadow-[0_0_15px_rgba(244,63,94,0.3)] hover:bg-rose-400">Log Bug Ticket</button>
                             </div>
                         </form>
                     </div>

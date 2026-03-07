@@ -99,22 +99,22 @@ export default function ServersTab() {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in">
+        <div className="space-y-4 md:space-y-6 animate-in fade-in">
             {metrics && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="md:col-span-3 bg-[#070308] border border-[#721C97]/30 rounded-2xl p-6 shadow-lg flex flex-col md:flex-row gap-6">
-                        <div className="flex-1 space-y-4">
-                            <div>
-                                <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Total Servers</p>
-                                <h3 className="text-4xl font-black text-white">{metrics.total_servers}</h3>
+                    <div className="md:col-span-3 bg-[#070308] border border-[#721C97]/30 rounded-2xl p-4 md:p-6 shadow-lg flex flex-col md:flex-row gap-4 md:gap-6">
+                        <div className="flex-1 space-y-4 flex flex-row md:flex-col justify-between md:justify-start">
+                            <div className="text-center md:text-left">
+                                <p className="text-gray-400 text-[10px] md:text-xs uppercase font-bold tracking-wider mb-1">Total Servers</p>
+                                <h3 className="text-2xl md:text-4xl font-black text-white">{metrics.total_servers}</h3>
                             </div>
-                            <div>
-                                <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Monthly Cost</p>
-                                <h3 className="text-4xl font-black text-[#C1FF72]">${metrics.total_monthly_usd}</h3>
+                            <div className="text-center md:text-left">
+                                <p className="text-gray-400 text-[10px] md:text-xs uppercase font-bold tracking-wider mb-1">Monthly Cost</p>
+                                <h3 className="text-2xl md:text-4xl font-black text-[#C1FF72]">${metrics.total_monthly_usd}</h3>
                             </div>
                         </div>
-                        <div className="flex-[2] h-40">
-                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-2 text-center">Upcoming Renewals Alert</p>
+                        <div className="flex-[2] h-32 md:h-40 mt-4 md:mt-0">
+                            <p className="text-gray-400 text-[10px] md:text-xs uppercase font-bold tracking-wider mb-2 text-center">Upcoming Renewals Alert</p>
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={[
                                     { name: '< 7 Days', renewals: metrics.renewals_within_7_days, color: '#ef4444' },
@@ -147,15 +147,15 @@ export default function ServersTab() {
                 </div>
             )}
 
-            <div className="bg-[#070308] border border-[#721C97]/30 rounded-2xl p-6 shadow-lg relative">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-white">Servers & Hosting</h2>
-                    <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2 bg-[#C1FF72] text-[#070308] rounded-xl hover:bg-[#aef556] transition-colors font-bold shadow-[0_0_15px_rgba(193,255,114,0.2)]">
+            <div className="bg-[#070308] border border-[#721C97]/30 rounded-2xl p-4 md:p-6 shadow-lg relative">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 md:mb-6">
+                    <h2 className="text-lg md:text-xl font-bold text-white">Servers & Hosting</h2>
+                    <button onClick={openCreateModal} className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-[#C1FF72] text-[#070308] rounded-xl hover:bg-[#aef556] transition-colors font-bold shadow-[0_0_15px_rgba(193,255,114,0.2)] text-sm md:text-base">
                         <FiPlus /> Add Server
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                     {isLoading ? (
                         <div className="col-span-full text-center py-8 text-gray-500">Loading servers...</div>
                     ) : servers.length === 0 ? (
@@ -207,13 +207,13 @@ export default function ServersTab() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-[#721C97]/50 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_40px_rgba(114,28,151,0.3)]">
-                        <div className="p-6 border-b border-[#721C97]/30 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
-                            <h2 className="text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit Server' : 'Add New Server'}</h2>
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-[#721C97]/50 md:rounded-2xl rounded-t-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(114,28,151,0.3)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-[#721C97]/30 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
+                            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit Server' : 'Add New Server'}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-lg transition-colors"><FiTrash2 className="hidden" /> ✕</button>
                         </div>
-                        <form onSubmit={handleSave} className="p-6 space-y-6">
+                        <form onSubmit={handleSave} className="p-4 md:p-6 space-y-4 md:space-y-6">
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div><label className="block text-xs font-bold text-[#C1FF72] uppercase tracking-widest mb-1">Server Name*</label><input required type="text" className="w-full bg-[#070308] border border-[#721C97]/50 rounded-lg px-3 py-2 text-white outline-none focus:border-[#C1FF72]" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} /></div>
@@ -272,9 +272,9 @@ export default function ServersTab() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 justify-end pt-4 border-t border-[#721C97]/30 mt-6 sticky bottom-0 bg-[#070308] py-4">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl border border-[#721C97]/50 text-white font-bold hover:bg-[#721C97]/20 transition-colors">Cancel</button>
-                                <button type="submit" className="px-6 py-2.5 rounded-xl bg-[#C1FF72] text-[#070308] font-bold hover:bg-[#aef556] transition-colors shadow-[0_0_15px_rgba(193,255,114,0.3)]">{isEditing ? 'Save Changes' : 'Add Server'}</button>
+                            <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-3 justify-end pt-4 border-t border-[#721C97]/30 mt-6 sticky bottom-0 bg-[#070308] py-4">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="w-full md:w-auto px-6 py-2.5 rounded-xl border border-[#721C97]/50 text-white font-bold hover:bg-[#721C97]/20 transition-colors">Cancel</button>
+                                <button type="submit" className="w-full md:w-auto px-6 py-2.5 rounded-xl bg-[#C1FF72] text-[#070308] font-bold hover:bg-[#aef556] transition-colors shadow-[0_0_15px_rgba(193,255,114,0.3)]">{isEditing ? 'Save Changes' : 'Add Server'}</button>
                             </div>
                         </form>
                     </div>

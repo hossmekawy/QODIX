@@ -47,9 +47,9 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+        <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500 pb-20 px-4 md:px-0 pt-4 md:pt-0">
             {/* Header / Breadcrumbs */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#070308] border border-white/10 rounded-2xl p-6 shadow-lg relative overflow-hidden print-hidden">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#070308] border border-white/10 rounded-2xl p-4 md:p-6 shadow-lg relative overflow-hidden print-hidden">
                 <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] pointer-events-none rounded-full ${getStatusColor(project.status).split(' ')[0].replace('text-', 'bg-')}/10`}></div>
 
                 <div>
@@ -66,51 +66,51 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
                     </p>
                 </div>
 
-                <div className="flex flex-col items-end gap-2 text-sm">
+                <div className="flex flex-col items-start md:items-end gap-2 text-sm mt-4 md:mt-0 w-full md:w-auto border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
                     <span className={`px-4 py-1.5 rounded-full font-black uppercase tracking-widest border border-dashed ${getStatusColor(project.status)}`}>
                         {project.status}
                     </span>
-                    <span className="text-gray-500 flex items-center gap-1"><FiClock /> Deadline: <span className="text-white">{project.deadline || 'N/A'}</span></span>
+                    <span className="text-gray-500 flex items-center gap-1 mt-1 md:mt-0"><FiClock /> Deadline: <span className="text-white">{project.deadline || 'N/A'}</span></span>
                 </div>
             </div>
 
             {/* Sub-Navigation Tabs */}
-            <div className="flex overflow-x-auto pb-2 custom-scrollbar gap-2 max-w-full print-hidden">
+            <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2 max-w-full print-hidden">
                 <button
                     onClick={() => setActiveTab('report')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all whitespace-nowrap ${activeTab === 'report' ? 'bg-[#721C97] text-white shadow-[0_0_15px_rgba(114,28,151,0.4)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
+                    className={`flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'report' ? 'bg-[#721C97] text-white shadow-[0_0_15px_rgba(114,28,151,0.4)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
                 >
-                    <FiFileText className="w-4 h-4" /> Reports & Export
+                    <FiFileText className="w-4 h-4" /> Reports
                 </button>
                 <button
                     onClick={() => setActiveTab('overview')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-[#C1FF72] text-[#070308] shadow-[0_0_15px_rgba(193,255,114,0.2)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
+                    className={`flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'overview' ? 'bg-[#C1FF72] text-[#070308] shadow-[0_0_15px_rgba(193,255,114,0.2)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
                 >
                     <FiActivity className="w-4 h-4" /> Overview
                 </button>
                 <button
                     onClick={() => setActiveTab('tasks')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all whitespace-nowrap ${activeTab === 'tasks' ? 'bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
+                    className={`flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'tasks' ? 'bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
                 >
                     <FiCheckSquare className="w-4 h-4" /> Tasks
                 </button>
                 <button
                     onClick={() => setActiveTab('team')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all whitespace-nowrap ${activeTab === 'team' ? 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
+                    className={`flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'team' ? 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
                 >
                     <FiUsers className="w-4 h-4" /> Team
                 </button>
                 <button
                     onClick={() => setActiveTab('docs')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all whitespace-nowrap ${activeTab === 'docs' ? 'bg-amber-500 text-[#070308] shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
+                    className={`flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'docs' ? 'bg-amber-500 text-[#070308] shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
                 >
-                    <FiFileText className="w-4 h-4" /> Docs & Deliverables
+                    <FiFileText className="w-4 h-4" /> Docs
                 </button>
                 <button
                     onClick={() => setActiveTab('financials')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all whitespace-nowrap ${activeTab === 'financials' ? 'bg-emerald-500 text-[#070308] shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
+                    className={`flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'financials' ? 'bg-emerald-500 text-[#070308] shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5 bg-[#070308] border border-white/5'}`}
                 >
-                    <FiDollarSign className="w-4 h-4" /> Financial & QA
+                    <FiDollarSign className="w-4 h-4" /> Financials
                 </button>
             </div>
 

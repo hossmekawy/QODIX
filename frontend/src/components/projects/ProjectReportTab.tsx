@@ -180,8 +180,8 @@ export default function ProjectReportTab({ project }: ProjectReportTabProps) {
         <div className="space-y-6">
 
             {/* Configuration Dashboard (Hidden when Printing) */}
-            <div className="bg-[#070308] border border-white/10 rounded-2xl p-6 shadow-lg print-hidden animate-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2">
+            <div className="bg-[#070308] border border-white/10 rounded-2xl p-4 md:p-6 shadow-lg print-hidden animate-in slide-in-from-bottom-4 duration-500">
+                <h2 className="text-lg md:text-xl font-black text-white mb-6 flex items-center gap-2">
                     <FiFilter className="text-[#721C97]" /> Report Data Filters Options
                 </h2>
 
@@ -189,7 +189,7 @@ export default function ProjectReportTab({ project }: ProjectReportTabProps) {
                     {/* Include Checkboxes */}
                     <div className="md:col-span-2">
                         <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-4 border-b border-white/10 pb-2">Modules to Include</p>
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                             <label className="flex items-center gap-3 cursor-pointer group">
                                 <input type="checkbox" checked={config.includeDetails} onChange={e => setConfig({ ...config, includeDetails: e.target.checked })} className="w-4 h-4 rounded bg-[#070308] border-white/20 text-[#721C97] accent-[#721C97] group-hover:border-[#721C97] transition-colors" />
                                 <span className="text-gray-300 text-sm font-bold flex items-center gap-2"><FiActivity /> Primary Details</span>
@@ -240,16 +240,16 @@ export default function ProjectReportTab({ project }: ProjectReportTabProps) {
                 </div>
 
                 {/* Action Engine */}
-                <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap gap-4 items-center justify-between">
+                <div className="mt-8 pt-6 border-t border-white/10 flex flex-col xl:flex-row gap-4 xl:items-center justify-between">
                     <p className="text-sm text-gray-400 italic">Configure constraints before generating your preferred format.</p>
-                    <div className="flex gap-3">
-                        <button onClick={handleExportCSV} className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold bg-[#070308] border border-white/20 text-white hover:bg-white/5 transition-colors">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <button onClick={handleExportCSV} className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold bg-[#070308] border border-white/20 text-white hover:bg-white/5 transition-colors">
                             <FiDownload /> Export CSV
                         </button>
-                        <button onClick={handleExportExcel} className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold bg-[#070308] border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+                        <button onClick={handleExportExcel} className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold bg-[#070308] border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 transition-colors">
                             <FiFileText /> Export XLSX
                         </button>
-                        <button onClick={handlePrintPDF} className="flex items-center gap-2 px-8 py-2.5 rounded-xl font-black bg-[#721C97] text-white hover:bg-[#8d24ba] transition-all shadow-[0_0_20px_rgba(114,28,151,0.4)]">
+                        <button onClick={handlePrintPDF} className="w-full sm:w-auto justify-center flex items-center gap-2 px-8 py-2.5 rounded-xl font-black bg-[#721C97] text-white hover:bg-[#8d24ba] transition-all shadow-[0_0_20px_rgba(114,28,151,0.4)]">
                             <FiPrinter /> Print to PDF
                         </button>
                     </div>

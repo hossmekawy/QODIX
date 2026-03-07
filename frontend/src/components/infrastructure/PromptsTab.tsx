@@ -84,10 +84,10 @@ export default function PromptsTab() {
     };
 
     return (
-        <div className="bg-[#070308] border border-pink-500/30 rounded-2xl p-6 shadow-lg animate-in fade-in">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-white">AI Prompts Library</h2>
-                <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2 bg-pink-500/20 text-pink-400 rounded-xl hover:bg-pink-500/40 transition-colors border border-pink-500/50 font-bold">
+        <div className="bg-[#070308] border border-pink-500/30 rounded-2xl p-4 md:p-6 shadow-lg animate-in fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 md:mb-6">
+                <h2 className="text-lg md:text-xl font-bold text-white">AI Prompts Library</h2>
+                <button onClick={openCreateModal} className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-pink-500/20 text-pink-400 rounded-xl hover:bg-pink-500/40 transition-colors border border-pink-500/50 font-bold text-sm md:text-base">
                     <FiPlus /> New Prompt
                 </button>
             </div>
@@ -143,13 +143,13 @@ export default function PromptsTab() {
 
             {/* Create/Edit Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-pink-500/50 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_40px_rgba(236,72,153,0.2)]">
-                        <div className="p-6 border-b border-pink-500/20 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
-                            <h2 className="text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit Prompt' : 'Create New Prompt'}</h2>
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-pink-500/50 md:rounded-2xl rounded-t-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(236,72,153,0.2)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-pink-500/20 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
+                            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit Prompt' : 'Create New Prompt'}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-lg transition-colors">✕</button>
                         </div>
-                        <form onSubmit={handleSave} className="p-6 space-y-5">
+                        <form onSubmit={handleSave} className="p-4 md:p-6 space-y-4 md:space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-bold text-pink-400 uppercase tracking-widest mb-1">Prompt Title*</label>
@@ -171,9 +171,9 @@ export default function PromptsTab() {
                                 <textarea rows={2} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-pink-500 transition-colors text-sm custom-scrollbar" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="When to use this prompt, variables to replace, etc..."></textarea>
                             </div>
 
-                            <div className="flex gap-3 justify-end pt-4 border-t border-pink-500/20 mt-6 sticky bottom-0 bg-[#070308] py-4">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors">Cancel</button>
-                                <button type="submit" className="px-6 py-2.5 rounded-xl bg-pink-500 text-white font-bold hover:bg-pink-400 transition-colors shadow-[0_0_15px_rgba(236,72,153,0.3)]">{isEditing ? 'Save Changes' : 'Save Prompt'}</button>
+                            <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-3 justify-end pt-4 border-t border-pink-500/20 mt-6 sticky bottom-0 bg-[#070308] py-4 px-4 md:px-6">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="w-full md:w-auto px-6 py-2.5 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-colors">Cancel</button>
+                                <button type="submit" className="w-full md:w-auto px-6 py-2.5 rounded-xl bg-pink-500 text-white font-bold hover:bg-pink-400 transition-colors shadow-[0_0_15px_rgba(236,72,153,0.3)]">{isEditing ? 'Save Changes' : 'Save Prompt'}</button>
                             </div>
                         </form>
                     </div>

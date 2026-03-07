@@ -100,15 +100,15 @@ export default function DomainsSSLTab() {
     };
 
     return (
-        <div className="bg-[#070308] border border-[#721C97]/30 rounded-2xl p-6 shadow-lg animate-in fade-in">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-white">Domains & SSL Certificates</h2>
-                <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2 bg-blue-900/40 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-900/60 transition-colors font-bold shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+        <div className="bg-[#070308] border border-[#721C97]/30 rounded-2xl p-4 md:p-6 shadow-lg animate-in fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 md:mb-6">
+                <h2 className="text-lg md:text-xl font-bold text-white">Domains & SSL Certificates</h2>
+                <button onClick={openCreateModal} className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-blue-900/40 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-900/60 transition-colors font-bold shadow-[0_0_15px_rgba(59,130,246,0.1)] text-sm md:text-base">
                     <FiPlus /> Add Domain
                 </button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-sm text-gray-400">
                     <thead className="text-xs uppercase bg-[#721C97]/10 text-gray-300 border-b border-[#721C97]/30">
                         <tr>
@@ -174,13 +174,13 @@ export default function DomainsSSLTab() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-[#721C97]/50 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_40px_rgba(114,28,151,0.3)]">
-                        <div className="p-6 border-b border-[#721C97]/30 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
-                            <h2 className="text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit Domain' : 'Add New Domain'}</h2>
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-[#721C97]/50 md:rounded-2xl rounded-t-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(114,28,151,0.3)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-[#721C97]/30 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
+                            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit Domain' : 'Add New Domain'}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-lg transition-colors">✕</button>
                         </div>
-                        <form onSubmit={handleSave} className="p-6 space-y-6">
+                        <form onSubmit={handleSave} className="p-4 md:p-6 space-y-4 md:space-y-6">
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div><label className="block text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">Domain Name*</label><input required type="text" className="w-full bg-[#070308] border border-blue-900/50 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 transition-colors font-mono" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="example.com" /></div>
@@ -224,9 +224,9 @@ export default function DomainsSSLTab() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 justify-end pt-4 border-t border-[#721C97]/30 mt-6 sticky bottom-0 bg-[#070308] py-4">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl border border-blue-900/50 text-white font-bold hover:bg-white/5 transition-colors">Cancel</button>
-                                <button type="submit" className="px-6 py-2.5 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)]">{isEditing ? 'Save Changes' : 'Add Domain'}</button>
+                            <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-3 justify-end pt-4 border-t border-[#721C97]/30 mt-6 sticky bottom-0 bg-[#070308] py-4">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="w-full md:w-auto px-6 py-2.5 rounded-xl border border-blue-900/50 text-white font-bold hover:bg-white/5 transition-colors">Cancel</button>
+                                <button type="submit" className="w-full md:w-auto px-6 py-2.5 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)]">{isEditing ? 'Save Changes' : 'Add Domain'}</button>
                             </div>
                         </form>
                     </div>

@@ -101,15 +101,15 @@ export default function SocialMediaTab() {
     };
 
     return (
-        <div className="bg-[#070308] border border-[#721C97]/30 rounded-2xl p-6 shadow-lg animate-in fade-in">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-white">Social Media Credentials</h2>
-                <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2 bg-[#721C97]/20 text-white rounded-xl hover:bg-[#721C97]/40 transition-colors border border-[#721C97]/50 font-bold">
+        <div className="bg-[#070308] border border-[#721C97]/30 rounded-2xl p-4 md:p-6 shadow-lg animate-in fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 md:mb-6">
+                <h2 className="text-lg md:text-xl font-bold text-white">Social Media Credentials</h2>
+                <button onClick={openCreateModal} className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-[#721C97]/20 text-white rounded-xl hover:bg-[#721C97]/40 transition-colors border border-[#721C97]/50 font-bold text-sm md:text-base">
                     <FiPlus /> Add Account
                 </button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-sm text-gray-400">
                     <thead className="text-xs uppercase bg-[#721C97]/10 text-gray-300 border-b border-[#721C97]/30">
                         <tr>
@@ -162,15 +162,14 @@ export default function SocialMediaTab() {
                 </table>
             </div>
 
-            {/* Create/Edit Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-[#721C97]/50 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_40px_rgba(114,28,151,0.3)]">
-                        <div className="p-6 border-b border-[#721C97]/30 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
-                            <h2 className="text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit Credentials' : 'Add New Credentials'}</h2>
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-[#721C97]/50 md:rounded-2xl rounded-t-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(114,28,151,0.3)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-[#721C97]/30 flex justify-between items-center sticky top-0 bg-[#070308] z-10">
+                            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">{isEditing ? 'Edit Credentials' : 'Add New Credentials'}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-lg transition-colors">✕</button>
                         </div>
-                        <form onSubmit={handleSave} className="p-6 space-y-4">
+                        <form onSubmit={handleSave} className="p-4 md:p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div><label className="block text-xs font-bold text-[#C1FF72] uppercase tracking-widest mb-1">Platform Name*</label><input required type="text" className="w-full bg-[#070308] border border-[#721C97]/50 rounded-lg px-3 py-2 text-white outline-none focus:border-[#C1FF72] transition-colors" value={formData.platform} onChange={e => setFormData({ ...formData, platform: e.target.value })} placeholder="e.g. Facebook, X, Instagram" /></div>
                                 <div><label className="block text-xs font-bold text-[#C1FF72] uppercase tracking-widest mb-1">Login URL</label><input type="url" className="w-full bg-[#070308] border border-[#721C97]/50 rounded-lg px-3 py-2 text-white outline-none focus:border-[#C1FF72] transition-colors" value={formData.login_url} onChange={e => setFormData({ ...formData, login_url: e.target.value })} placeholder="https://" /></div>
@@ -188,9 +187,9 @@ export default function SocialMediaTab() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 justify-end pt-4 border-t border-[#721C97]/30 mt-6 sticky bottom-0 bg-[#070308] py-4">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl border border-[#721C97]/50 text-white font-bold hover:bg-[#721C97]/20 transition-colors">Cancel</button>
-                                <button type="submit" className="px-6 py-2.5 rounded-xl bg-[#C1FF72] text-[#070308] font-bold hover:bg-[#aef556] transition-colors shadow-[0_0_15px_rgba(193,255,114,0.3)]">{isEditing ? 'Save Changes' : 'Create Account'}</button>
+                            <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-3 justify-end pt-4 border-t border-[#721C97]/30 mt-6 sticky bottom-0 bg-[#070308] py-4">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="w-full md:w-auto px-6 py-2.5 rounded-xl border border-[#721C97]/50 text-white font-bold hover:bg-[#721C97]/20 transition-colors">Cancel</button>
+                                <button type="submit" className="w-full md:w-auto px-6 py-2.5 rounded-xl bg-[#C1FF72] text-[#070308] font-bold hover:bg-[#aef556] transition-colors shadow-[0_0_15px_rgba(193,255,114,0.3)]">{isEditing ? 'Save Changes' : 'Create Account'}</button>
                             </div>
                         </form>
                     </div>

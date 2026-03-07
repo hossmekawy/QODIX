@@ -15,6 +15,10 @@ export default function ProjectOverviewTab({ project, onUpdate }: ProjectOvervie
 
     // Form logic for scope editor
     const [editForm, setEditForm] = useState({
+        name: project?.name || '',
+        project_type: project?.project_type || 'WebApp',
+        priority: project?.priority || 'Medium',
+        budget_quoted: project?.budget_quoted || '',
         description: project?.description || '',
         scope: project?.scope || '',
         start_date: project?.start_date || '',
@@ -103,13 +107,13 @@ export default function ProjectOverviewTab({ project, onUpdate }: ProjectOvervie
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Scope & Details */}
-                <div className="bg-[#070308] border border-white/10 rounded-2xl p-6 shadow-lg relative print-break-avoid">
-                    <div className="flex justify-between items-center mb-4">
+                <div className="bg-[#070308] border border-white/10 rounded-2xl p-4 md:p-6 shadow-lg relative print-break-avoid">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
                         <h3 className="text-lg font-bold text-white flex items-center gap-2">
                             <div className="w-1.5 h-5 bg-purple-500 rounded-full"></div> Project Scope Definition
                         </h3>
                         {!isEditing ? (
-                            <button onClick={() => setIsEditing(true)} className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold">
+                            <button onClick={() => setIsEditing(true)} className="w-full md:w-auto justify-center text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold">
                                 <FiEdit2 /> Edit
                             </button>
                         ) : (
@@ -120,6 +124,10 @@ export default function ProjectOverviewTab({ project, onUpdate }: ProjectOvervie
                                 <button disabled={isSaving} onClick={() => {
                                     setIsEditing(false);
                                     setEditForm({
+                                        name: project?.name || '',
+                                        project_type: project?.project_type || 'WebApp',
+                                        priority: project?.priority || 'Medium',
+                                        budget_quoted: project?.budget_quoted || '',
                                         description: project?.description || '',
                                         scope: project?.scope || '',
                                         start_date: project?.start_date || '',
@@ -134,6 +142,38 @@ export default function ProjectOverviewTab({ project, onUpdate }: ProjectOvervie
                     </div>
 
                     <div className="space-y-4">
+                        {isEditing && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-white/10 mb-4">
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Project Name</p>
+                                    <input type="text" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-purple-500 text-sm" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Project Type</p>
+                                    <select className="w-full bg-[#070308] border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-purple-500 text-sm" value={editForm.project_type} onChange={e => setEditForm({ ...editForm, project_type: e.target.value })}>
+                                        <option value="WebApp">Web Application</option>
+                                        <option value="Website">Website</option>
+                                        <option value="MobileApp">Mobile App</option>
+                                        <option value="DesktopApp">Desktop App</option>
+                                        <option value="System">System Integration</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Priority</p>
+                                    <select className="w-full bg-[#070308] border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-purple-500 text-sm" value={editForm.priority} onChange={e => setEditForm({ ...editForm, priority: e.target.value })}>
+                                        <option value="Critical">Critical</option>
+                                        <option value="High">High</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Low">Low</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Quoted Budget</p>
+                                    <input type="number" step="0.01" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-purple-500 text-sm" value={editForm.budget_quoted} onChange={e => setEditForm({ ...editForm, budget_quoted: e.target.value })} />
+                                </div>
+                            </div>
+                        )}
                         <div>
                             <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Brief Description</p>
                             {isEditing ? (
@@ -152,7 +192,7 @@ export default function ProjectOverviewTab({ project, onUpdate }: ProjectOvervie
                                 </div>
                             )}
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Start Date</p>
                                 {isEditing ? (
@@ -176,7 +216,7 @@ export default function ProjectOverviewTab({ project, onUpdate }: ProjectOvervie
                 </div>
 
                 {/* Milestones / Payment Terms */}
-                <div className="bg-[#070308] border border-white/10 rounded-2xl p-6 shadow-lg print-break-avoid">
+                <div className="bg-[#070308] border border-white/10 rounded-2xl p-4 md:p-6 shadow-lg print-break-avoid">
                     <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                         <div className="w-1.5 h-5 bg-emerald-500 rounded-full"></div> Deliverables & Milestones
                     </h3>

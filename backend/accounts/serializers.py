@@ -114,3 +114,11 @@ class PINLoginSerializer(serializers.Serializer):
             'access': str(refresh.access_token),
             'user': UserSerializer(user).data
         }
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+class ChangePINSerializer(serializers.Serializer):
+    old_pin = serializers.CharField(required=False, allow_blank=True)
+    new_pin = serializers.CharField(required=True)

@@ -65,7 +65,7 @@ export default function ProjectTeamTab({ projectId }: ProjectTeamTabProps) {
 
     return (
         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center bg-[#070308] border border-white/10 p-4 rounded-xl shadow-lg">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#070308] border border-white/10 p-4 rounded-xl shadow-lg">
                 <div className="flex items-center gap-3">
                     <FiUsers className="text-purple-500 w-6 h-6" />
                     <div>
@@ -73,7 +73,7 @@ export default function ProjectTeamTab({ projectId }: ProjectTeamTabProps) {
                         <p className="text-xs text-gray-400">Manage resource allocation and roles</p>
                     </div>
                 </div>
-                <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-purple-500/20 text-purple-400 border border-purple-500/50 font-bold rounded-lg hover:bg-purple-500/40 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                <button onClick={() => setIsModalOpen(true)} className="w-full md:w-auto justify-center px-4 py-2 bg-purple-500/20 text-purple-400 border border-purple-500/50 font-bold rounded-lg hover:bg-purple-500/40 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
                     <FiUserPlus /> Assign Member
                 </button>
             </div>
@@ -118,13 +118,13 @@ export default function ProjectTeamTab({ projectId }: ProjectTeamTabProps) {
             )}
 
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-purple-500/30 rounded-2xl w-full max-w-md shadow-[0_0_40px_rgba(168,85,247,0.15)]">
-                        <div className="p-6 border-b border-purple-500/20 flex justify-between items-center bg-purple-500/5 rounded-t-2xl">
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-purple-500/30 md:rounded-2xl rounded-t-2xl w-full max-w-md max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(168,85,247,0.15)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-purple-500/20 flex justify-between items-center bg-purple-500/5 sticky top-0 z-10">
                             <h2 className="text-xl font-bold text-white">Assign Team Member</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-1.5 rounded-lg"><FiX /></button>
                         </div>
-                        <form onSubmit={handleAssign} className="p-6 space-y-4">
+                        <form onSubmit={handleAssign} className="p-4 md:p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Select User*</label>
                                 <select required className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-purple-500" value={formData.user} onChange={e => setFormData({ ...formData, user: e.target.value })}>
@@ -142,7 +142,7 @@ export default function ProjectTeamTab({ projectId }: ProjectTeamTabProps) {
                                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Time Allocation (Hours)</label>
                                 <input type="number" step="0.5" className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-purple-500" value={formData.allocation_hours} onChange={e => setFormData({ ...formData, allocation_hours: e.target.value })} placeholder="0.0" />
                             </div>
-                            <div className="pt-4 flex justify-end">
+                            <div className="pt-4 flex flex-col justify-end sticky bottom-0 bg-[#070308] pb-4 md:pb-0">
                                 <button type="submit" className="px-6 py-2.5 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-400 transition-colors w-full shadow-[0_0_15px_rgba(168,85,247,0.3)]">Add to Project</button>
                             </div>
                         </form>

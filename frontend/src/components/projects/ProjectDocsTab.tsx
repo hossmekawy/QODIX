@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
-import { FiFileText, FiLink, FiPlus, FiTrash2, FiExternalLink, FiServer, FiDownload } from 'react-icons/fi';
+import { FiFileText, FiLink, FiPlus, FiTrash2, FiExternalLink, FiServer, FiDownload, FiX } from 'react-icons/fi';
 
 interface ProjectDocsTabProps {
     projectId: string;
@@ -146,13 +146,13 @@ export default function ProjectDocsTab({ projectId }: ProjectDocsTabProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* References & Links Sector */}
-                <div className="bg-[#070308] border border-white/10 rounded-2xl p-5 shadow-lg">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="bg-[#070308] border border-white/10 rounded-2xl p-4 md:p-5 shadow-lg">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div className="flex items-center gap-2 text-amber-500">
                             <FiLink className="w-5 h-5" />
                             <h3 className="text-lg font-bold text-white">External Docs & Links</h3>
                         </div>
-                        <button onClick={() => setIsDocModalOpen(true)} className="px-3 py-1.5 bg-amber-500/20 text-amber-500 border border-amber-500/50 rounded-lg font-bold hover:bg-amber-500/40 text-xs flex gap-1 items-center">
+                        <button onClick={() => setIsDocModalOpen(true)} className="w-full md:w-auto justify-center px-3 py-1.5 bg-amber-500/20 text-amber-500 border border-amber-500/50 rounded-lg font-bold hover:bg-amber-500/40 text-xs flex gap-1 items-center">
                             <FiPlus /> Add Reference
                         </button>
                     </div>
@@ -177,13 +177,13 @@ export default function ProjectDocsTab({ projectId }: ProjectDocsTabProps) {
                 </div>
 
                 {/* Major Deliverables / Repo / Servers */}
-                <div className="bg-[#070308] border border-white/10 rounded-2xl p-5 shadow-lg">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="bg-[#070308] border border-white/10 rounded-2xl p-4 md:p-5 shadow-lg">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div className="flex items-center gap-2 text-cyan-400">
                             <FiFileText className="w-5 h-5" />
                             <h3 className="text-lg font-bold text-white">Track Deliverables & Repos</h3>
                         </div>
-                        <button onClick={() => setIsDeliverableModalOpen(true)} className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 rounded-lg font-bold hover:bg-cyan-500/40 text-xs flex gap-1 items-center">
+                        <button onClick={() => setIsDeliverableModalOpen(true)} className="w-full md:w-auto justify-center px-3 py-1.5 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 rounded-lg font-bold hover:bg-cyan-500/40 text-xs flex gap-1 items-center">
                             <FiPlus /> Track Milestone
                         </button>
                     </div>
@@ -211,7 +211,7 @@ export default function ProjectDocsTab({ projectId }: ProjectDocsTabProps) {
                                     </div>
                                     <p className="text-xs text-gray-500 mb-4">Target: {deliv.expected_date || 'TBD'}</p>
 
-                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                                         {deliv.repo_link && (
                                             <a href={deliv.repo_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500/20 border border-blue-500/20 transition-colors truncate">
                                                 <FiLink /> Repository Link
@@ -238,12 +238,12 @@ export default function ProjectDocsTab({ projectId }: ProjectDocsTabProps) {
 
             {/* Document Creation Modal */}
             {isDocModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-amber-500/30 rounded-2xl w-full max-w-md shadow-[0_0_40px_rgba(245,158,11,0.15)]">
-                        <div className="p-6 border-b border-amber-500/20">
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-amber-500/30 md:rounded-2xl rounded-t-2xl w-full max-w-md max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(245,158,11,0.15)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-amber-500/20 sticky top-0 bg-[#070308] z-10">
                             <h2 className="text-xl font-bold text-white">Add External Reference Link</h2>
                         </div>
-                        <form onSubmit={handleSaveDoc} className="p-6 space-y-4">
+                        <form onSubmit={handleSaveDoc} className="p-4 md:p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 mb-1">Title Fragment</label>
                                 <input required type="text" className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white" value={docData.title} onChange={e => setDocData({ ...docData, title: e.target.value })} placeholder="e.g. Prototype Figma File" />
@@ -315,8 +315,8 @@ export default function ProjectDocsTab({ projectId }: ProjectDocsTabProps) {
                                 </div>
                             )}
 
-                            <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
-                                <button type="button" onClick={() => { setIsDocModalOpen(false); setUrlLinks(['']); setUploadFiles([]); }} className="px-4 py-2 border border-white/10 text-white flex-1 rounded-lg">Cancel</button>
+                            <div className="flex flex-col-reverse md:flex-row justify-end gap-2 pt-4 border-t border-white/10 mt-6 sticky bottom-0 bg-[#070308] pb-4 md:pb-0 px-4 md:px-0 -mx-4 md:mx-0">
+                                <button type="button" onClick={() => { setIsDocModalOpen(false); setUrlLinks(['']); setUploadFiles([]); }} className="px-4 py-2 border border-white/10 text-white flex-1 rounded-lg hover:bg-white/5">Cancel</button>
                                 <button type="submit" disabled={isSaving} className="px-4 py-2 bg-amber-500 text-[#070308] font-bold rounded-lg shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-400 flex-1">
                                     {isSaving ? 'Uploading...' : 'Save Data'}
                                 </button>
@@ -328,17 +328,18 @@ export default function ProjectDocsTab({ projectId }: ProjectDocsTabProps) {
 
             {/* Deliverable Modal */}
             {isDeliverableModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-[#070308] border border-cyan-500/30 rounded-2xl w-full max-w-lg shadow-[0_0_40px_rgba(34,211,238,0.15)]">
-                        <div className="p-6 border-b border-cyan-500/20">
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-[#070308] border border-cyan-500/30 md:rounded-2xl rounded-t-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(34,211,238,0.15)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">
+                        <div className="p-4 md:p-6 border-b border-cyan-500/20 sticky top-0 bg-[#070308] z-10 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-white">Track Major Deliverable</h2>
+                            <button onClick={() => setIsDeliverableModalOpen(false)} className="text-gray-400 hover:text-white bg-white/5 p-2 rounded-lg transition-colors"><FiX /></button>
                         </div>
-                        <form onSubmit={handleSaveDeliverable} className="p-6 space-y-4">
+                        <form onSubmit={handleSaveDeliverable} className="p-4 md:p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 mb-1">Deliverable Title / Goal*</label>
                                 <input required type="text" className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white" value={delivData.title} onChange={e => setDelivData({ ...delivData, title: e.target.value })} placeholder="e.g. Alpha Release v1.0" />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 mb-1">Expected Delivery Date</label>
                                     <input type="date" className="w-full bg-[#070308] border border-white/20 rounded-lg px-3 py-2 text-white" value={delivData.expected_date} onChange={e => setDelivData({ ...delivData, expected_date: e.target.value })} />
@@ -372,9 +373,9 @@ export default function ProjectDocsTab({ projectId }: ProjectDocsTabProps) {
                                     </select>
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-2 pt-4 mt-6 border-t border-white/10">
-                                <button type="button" onClick={() => setIsDeliverableModalOpen(false)} className="px-5 py-2 border border-white/10 text-white rounded-lg">Cancel</button>
-                                <button type="submit" className="px-5 py-2 bg-cyan-500 text-[#070308] font-bold rounded-lg shadow-[0_0_15px_rgba(34,211,238,0.3)] hover:bg-cyan-400">Save Milstone</button>
+                            <div className="flex flex-col-reverse md:flex-row justify-end gap-2 pt-4 mt-6 border-t border-white/10 sticky bottom-0 bg-[#070308] pb-4 md:pb-0 px-4 md:px-0 -mx-4 md:mx-0">
+                                <button type="button" onClick={() => setIsDeliverableModalOpen(false)} className="w-full md:w-auto px-5 py-2 border border-white/10 text-white hover:bg-white/5 transition-colors rounded-lg">Cancel</button>
+                                <button type="submit" className="w-full md:w-auto px-5 py-2 bg-cyan-500 text-[#070308] font-bold rounded-lg shadow-[0_0_15px_rgba(34,211,238,0.3)] hover:bg-cyan-400 opacity-90">Save Milestone</button>
                             </div>
                         </form>
                     </div>
