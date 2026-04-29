@@ -152,6 +152,8 @@ CORS_ALLOW_ALL_ORIGINS = True  # WARNING: for development only; configure proper
 CSRF_TRUSTED_ORIGINS = [
     'http://qodix.167.86.71.246.nip.io:9000',
     'http://167.86.71.246:9000',
+    'http://portal.qodix.tech',
+    'https://portal.qodix.tech',
 ]
 
 REST_FRAMEWORK = {

@@ -8,7 +8,8 @@ import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 const isClient = typeof window !== 'undefined';
 const HOST = isClient ? window.location.hostname : '127.0.0.1';
 const PORT = isClient ? window.location.port : '9000';
-const BACKEND_URL = `http://${HOST}:${PORT}`;
+const PROTOCOL = isClient ? window.location.protocol : 'http:';
+const BACKEND_URL = PORT ? `${PROTOCOL}//${HOST}:${PORT}` : `${PROTOCOL}//${HOST}`;
 
 function resolveMediaUrl(url: string | null | undefined): string | null {
     if (!url) return null;
@@ -129,7 +130,9 @@ export default function ChatPage() {
             setMessages(msgRes.data.reverse());
 
             const token = localStorage.getItem('access_token');
-            const wsUrl = `ws://${HOST}:${PORT}/ws/chat/${conv.id}/?token=${token}`;
+            const wsProto = PROTOCOL === 'https:' ? 'wss:' : 'ws:';
+            const wsBase = PORT ? `${wsProto}//${HOST}:${PORT}` : `${wsProto}//${HOST}`;
+            const wsUrl = `${wsBase}/ws/chat/${conv.id}/?token=${token}`;
 
             let reconnectDelay = 2000;
             let currentWs: WebSocket | null = null;

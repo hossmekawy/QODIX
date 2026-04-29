@@ -3,7 +3,9 @@ import axios from 'axios';
 const isClient = typeof window !== 'undefined';
 const HOST = isClient ? window.location.hostname : 'localhost';
 const PORT = isClient ? window.location.port : '9000';
-const API_URL = `http://${HOST}:${PORT}/api`;
+const PROTOCOL = isClient ? window.location.protocol : 'http:';
+const BASE = PORT ? `${PROTOCOL}//${HOST}:${PORT}` : `${PROTOCOL}//${HOST}`;
+const API_URL = `${BASE}/api`;
 
 const api = axios.create({
     baseURL: API_URL,
