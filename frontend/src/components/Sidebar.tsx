@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiHome, FiUsers, FiBox, FiTrendingUp, FiSettings, FiGrid, FiFileText, FiServer, FiFile, FiBell, FiMessageSquare, FiDollarSign } from 'react-icons/fi';
+import { FiHome, FiUsers, FiBox, FiTrendingUp, FiSettings, FiGrid, FiFileText, FiServer, FiFile, FiBell, FiMessageSquare, FiDollarSign, FiActivity } from 'react-icons/fi';
 import { useSettings } from '@/contexts/SettingsContext';
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
     { name: 'Contracts', href: '/dashboard/contracts', icon: FiFileText },
     { name: 'Docs & Templates', href: '/dashboard/contracts/templates', icon: FiFile },
     { name: 'Infrastructure', href: '/dashboard/infrastructure', icon: FiServer },
+    { name: 'Port Map', href: '/dashboard/ports', icon: FiActivity },
     { name: 'Conversations', href: '/dashboard/chat', icon: FiMessageSquare },
     { name: 'Notifications', href: '/dashboard/notifications', icon: FiBell },
     { name: 'Settings', href: '/dashboard/settings', icon: FiSettings },

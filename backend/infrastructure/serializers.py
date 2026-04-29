@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SocialAccount, SocialAccountAccessLog, Server, HostedProject, ProviderInvoice, Domain, SSLCertificate, APIKey, Prompt
+from .models import SocialAccount, SocialAccountAccessLog, Server, HostedProject, ProviderInvoice, Domain, SSLCertificate, APIKey, Prompt, PortLabel
 from accounts.serializers import UserSerializer
 
 class SocialAccountSerializer(serializers.ModelSerializer):
@@ -53,3 +53,9 @@ class PromptSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prompt
         fields = '__all__'
+
+
+class PortLabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PortLabel
+        fields = ['id', 'server', 'port', 'label', 'notes', 'created_at', 'updated_at']

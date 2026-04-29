@@ -1,14 +1,16 @@
 'use client';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import { FiServer, FiPlus, FiTerminal, FiCreditCard, FiTrash2, FiEdit2 } from 'react-icons/fi';
+import { FiServer, FiPlus, FiTerminal, FiCreditCard, FiTrash2, FiEdit2, FiActivity } from 'react-icons/fi';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useToast } from '@/contexts/ToastContext';
+import ServerInspectModal from './ServerInspectModal';
 
 export default function ServersTab() {
     const [servers, setServers] = useState<any[]>([]);
     const [metrics, setMetrics] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [inspectingServer, setInspectingServer] = useState<any>(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -196,6 +198,7 @@ export default function ServersTab() {
                                 </div>
 
                                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
+                                    <button onClick={() => setInspectingServer(server)} title="Inspect server" className="p-1.5 bg-[#C1FF72]/10 hover:bg-[#C1FF72]/30 text-[#C1FF72] rounded transition-colors"><FiActivity size={12} /></button>
                                     <button onClick={() => openEditModal(server)} className="p-1.5 bg-black/50 hover:bg-[#721C97]/50 text-white rounded transition-colors"><FiEdit2 size={12} /></button>
                                     <button onClick={() => handleDelete(server.id)} className="p-1.5 bg-black/50 hover:bg-red-900/50 text-red-400 rounded transition-colors"><FiTrash2 size={12} /></button>
                                 </div>
@@ -205,7 +208,12 @@ export default function ServersTab() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Inspect Modal */}
+            {inspectingServer && (
+                <ServerInspectModal server={inspectingServer} onClose={() => setInspectingServer(null)} />
+            )}
+
+            {/* Add/Edit Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
                     <div className="bg-[#070308] border border-[#721C97]/50 md:rounded-2xl rounded-t-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar shadow-[0_0_40px_rgba(114,28,151,0.3)] animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 md:zoom-in-95">

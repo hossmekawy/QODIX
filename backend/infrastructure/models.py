@@ -144,3 +144,20 @@ class Prompt(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PortLabel(models.Model):
+    """Stores user-defined labels and notes for specific ports on a server."""
+    server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name='port_labels')
+    port = models.IntegerField()
+    label = models.CharField(max_length=100, blank=True, default='')
+    notes = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('server', 'port')
+        ordering = ['port']
+
+    def __str__(self):
+        return f"Port {self.port} on {self.server.name} — {self.label or 'unlabeled'}"
