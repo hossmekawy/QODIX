@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import AuthGuard from '@/components/AuthGuard';
 import { useState } from 'react';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 
 export default function DashboardLayout({
     children,
@@ -32,6 +33,7 @@ export default function DashboardLayout({
                                 {children}
                             </div>
                         </main>
+                        <PWAInstallPrompt />
                     </div>
                 </div>
             </SettingsProvider>

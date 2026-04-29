@@ -147,8 +147,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
 
-CORS_ALLOW_ALL_ORIGINS = True  # WARNING: for development only; configure properly for prod
+CORS_ALLOW_ALL_ORIGINS = True  # Keep True for local dev if needed, or set False and use CORS_ALLOWED_ORIGINS
+CORS_ALLOWED_ORIGINS = [
+    "https://portal.qodix.tech",
+    "http://portal.qodix.tech",
+]
 
+# PWA Security Settings (Enable these when running fully on HTTPS)
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = [
     'http://qodix.167.86.71.246.nip.io:9000',
     'http://167.86.71.246:9000',
