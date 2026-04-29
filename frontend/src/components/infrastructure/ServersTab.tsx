@@ -47,19 +47,48 @@ export default function ServersTab() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            // Clean empty optional fields — Django rejects '' for DateField/URLField, needs null
+            const payload = {
+                ...formData,
+                purchase_date: formData.purchase_date || null,
+                renewal_date: formData.renewal_date || null,
+                portal_url: formData.portal_url || null,
+                ip_address: formData.ip_address || null,
+                location: formData.location || null,
+                payment_method: formData.payment_method || null,
+            };
             if (isEditing && currentId) {
-                await api.patch(`/infrastructure/servers/${currentId}/`, formData);
+                await api.patch(`/infrastructure/servers/${currentId}/`, payload);
                 toast.success('Server updated successfully');
             } else {
-                await api.post('/infrastructure/servers/', formData);
+                await api.post('/infrastructure/servers/', payload);
                 toast.success('Server created successfully');
             }
             setIsModalOpen(false);
             fetchData();
-        } catch (error) {
-            toast.error('Failed to save server');
+        } catch (error: any) {
+            // Extract the real Django validation error
+            const data = error?.response?.data;
+            let msg = 'Failed to save server';
+            if (data) {
+                if (typeof data === 'string') {
+                    msg = data;
+                } else if (data.detail) {
+                    msg = data.detail;
+                } else {
+                    // DRF field errors: { field: ["error msg", ...], ... }
+                    const parts = Object.entries(data)
+                        .map(([field, errs]) => {
+                            const errStr = Array.isArray(errs) ? errs.join(', ') : String(errs);
+                            return `${field}: ${errStr}`;
+                        });
+                    if (parts.length) msg = parts.join(' | ');
+                }
+            }
+            toast.error(msg);
         }
     };
+
 
     const handleDelete = async (id: number) => {
         if (!confirm('Are you sure you want to delete this server?')) return;
